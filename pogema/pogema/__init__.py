@@ -1,0 +1,20 @@
+from gymnasium import register
+from pogema.grid_config import GridConfig
+from pogema.integrations.make_pogema import pogema_v0
+from pogema.svg_animation.animation_wrapper import AnimationMonitor, AnimationConfig
+from pogema.a_star_policy import AStarAgent, BatchAStarAgent
+from .a_star_policy import a_star
+
+__version__ = '1.3.1'
+
+__all__ = [
+    'GridConfig',
+    'pogema_v0',
+    'AStarAgent', 'BatchAStarAgent',
+    "AnimationMonitor", "AnimationConfig",
+]
+
+register(
+    id="Pogema-v0",
+    entry_point="pogema.integrations.make_pogema:make_single_agent_gym",
+)

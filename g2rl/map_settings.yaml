@@ -1,0 +1,14 @@
+regular:
+  size: 128
+  density: 0.6  # ✅ 改成 density
+  num_agents: 16
+
+random:
+  size: 48
+  density: 0.15
+  num_agents: 6
+
+free:
+  size: 48
+  density: 0.0
+  num_agents: 11
