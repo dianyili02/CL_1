@@ -8,7 +8,7 @@ import sys
 import torch
 from torch.utils.tensorboard import SummaryWriter
 from pogema import AStarAgent
-project_root = r"C:/Users/MSc_SEIoT_1/MAPF_G2RL-main"
+project_root = r"C:/Users/MSc_SEIoT_1/MAPF_G2RL-main - train"
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 from g2rl.environment import G2RLEnv
@@ -19,8 +19,9 @@ from g2rl.curriculum import CurriculumScheduler
 import time
 from pathlib import Path
 from collections import deque
+import pandas as pd
 
-MAP_SETTINGS_PATH = 'C:/Users/MSc_SEIoT_1/MAPF_G2RL-main/g2rl/map_settings_generated.yaml'
+MAP_SETTINGS_PATH = 'C:/Users/MSc_SEIoT_1/MAPF_G2RL-main - train/g2rl/map_settings_generated_new.yaml'
 
 import yaml
 
@@ -99,7 +100,7 @@ for name in map_names:
 
 # ===== Complexity-based Curriculum Scheduler =====
 from typing import Iterable
-from complexity_module import compute_map_complexity
+from g2rl.complexity import compute_complexity
 import numpy as np
 import yaml, math, random
 
@@ -117,27 +118,27 @@ WEIGHTS = {
 }
 FEATURE_MEAN_STD = None  # 若训练时做过标准化，按 {'Size':(mu, sigma), ...} 传入
 
-def _compute_complexities_for_settings(base_map_settings: Dict[str, dict],
-                                       size_mode: str = "max") -> pd.DataFrame:
-    """对单 YAML 内所有地图项逐个计算 complexity，返回 DataFrame."""
-    rows = []
-    for name, spec in base_map_settings.items():
-        try:
-            cpx, used, raw = compute_map_complexity(
-                spec, intercept=INTERCEPT, weights=WEIGHTS,
-                feature_mean_std=FEATURE_MEAN_STD, size_mode=size_mode
-            )
-            rows.append({
-                "name": name,
-                "complexity": float(cpx),
-                "spec": spec,
-            })
-        except Exception as e:
-            rows.append({"name": name, "error": str(e), "spec": spec})
-    df = pd.DataFrame(rows)
-    if "error" in df.columns:
-        df = df[df["error"].isna()]
-    return df.sort_values("complexity").reset_index(drop=True)
+# def _compute_complexities_for_settings(base_map_settings: Dict[str, dict],
+#                                        size_mode: str = "max") -> pd.DataFrame:
+#     """对单 YAML 内所有地图项逐个计算 complexity，返回 DataFrame."""
+#     rows = []
+#     for name, spec in base_map_settings.items():
+#         try:
+#             cpx, used, raw = compute_complexity(
+#                 spec, intercept=INTERCEPT, weights=WEIGHTS,
+#                 feature_mean_std=FEATURE_MEAN_STD, size_mode=size_mode
+#             )
+#             rows.append({
+#                 "name": name,
+#                 "complexity": float(cpx),
+#                 "spec": spec,
+#             })
+#         except Exception as e:
+#             rows.append({"name": name, "error": str(e), "spec": spec})
+#     df = pd.DataFrame(rows)
+#     if "error" in df.columns:
+#         df = df[df["error"].isna()]
+#     return df.sort_values("complexity").reset_index(drop=True)
 
 def _build_stages_by_quantile_df(df: pd.DataFrame, n_stages: int = 5, min_per_stage: int = 5):
     if len(df) == 0:
@@ -160,6 +161,94 @@ def _build_stages_by_quantile_df(df: pd.DataFrame, n_stages: int = 5, min_per_st
             "items": sub.to_dict("records"),  # 每条含 name/spec/complexity
         })
     return stages
+
+
+# ======== Robust complexity building (single source of truth) ========
+import math, random, numpy as np, pandas as pd
+from typing import Dict, Tuple
+
+# 统一键名映射（YAML里常见大小写/别名）
+_KEY_RENAME = {
+    "map_size": "size",
+    "Size": "size",
+    "Agents": "num_agents",
+    "n_agents": "num_agents",
+    "N_agents": "num_agents",
+    "Density": "density",
+    "obs_density": "density",
+}
+
+def _normalize_spec(raw: dict) -> Tuple[dict, list]:
+    """把一条 map spec 统一成 {size, num_agents, density, ...} 并返回(规范化spec, 缺失字段列表)"""
+    spec = {}
+    missing = []
+    # 先 rename
+    for k, v in raw.items():
+        spec[_KEY_RENAME.get(k, k)] = v
+    # 必要字段
+    for k in ("size", "num_agents", "density"):
+        if k not in spec:
+            missing.append(k)
+    return spec, missing
+
+def _fallback_complexity(spec: dict) -> float:
+    """compute_complexity 失败时的后备简式，至少保证有数"""
+    size = int(spec.get("size", 8))
+    na   = int(spec.get("num_agents", 2))
+    dens = float(spec.get("density", 0.10))
+    # 你可以改这公式；先用一个温和上升的基线
+    return 0.45 * (na / max(1, size)) + 0.45 * dens + 0.10 * math.log2(max(2, size))
+
+def _compute_complexities_for_settings(base_map_settings: Dict[str, dict],
+                                       size_mode: str = "max") -> pd.DataFrame:
+    rows, err_rows = [], []
+    for name, raw in base_map_settings.items():
+        spec, missing = _normalize_spec(raw if isinstance(raw, dict) else {})
+        if missing:
+            err_rows.append((name, f"missing keys: {missing}"))
+            # 仍然用 fallback 计算，避免整表无 complexity
+            cpx = _fallback_complexity(spec)
+            rows.append({"name": name, "complexity": float(cpx), "spec": spec, "note": "fallback_missing"})
+            continue
+
+        # 优先尝试你的 learn-based 复杂度
+        try:
+            # 注意：compute_complexity 的 spec 需要是“你实现所需的键”，
+            # 这里传规范化后的 spec；如它还需要其他字段，请在 _normalize_spec 里补齐/rename
+            cpx, used, raw_feat = compute_complexity(
+                spec, intercept=INTERCEPT, weights=WEIGHTS,
+                feature_mean_std=FEATURE_MEAN_STD, size_mode=size_mode
+            )
+            rows.append({"name": name, "complexity": float(cpx), "spec": spec})
+        except Exception as e:
+            # 回退到简式，记录错误原因
+            err_rows.append((name, str(e)))
+            cpx = _fallback_complexity(spec)
+            rows.append({"name": name, "complexity": float(cpx), "spec": spec, "note": "fallback_error"})
+
+    df = pd.DataFrame(rows)
+
+    # 最终保险：如果依然没有 'complexity' 列，直接报带预览的错
+    if "complexity" not in df.columns:
+        raise RuntimeError(f"No 'complexity' column produced. Preview:\n{df.head()}")
+
+    # 清洗非法值
+    df = df.dropna(subset=["complexity"])
+    df = df[np.isfinite(df["complexity"])].copy()
+    df = df.sort_values("complexity").reset_index(drop=True)
+
+    # 打印错误统计，帮助你排查为何使用了 fallback
+    if err_rows:
+        print("⚠️  compute_complexity() errors (fallback used):")
+        for nm, msg in err_rows[:10]:
+            print(f"  - {nm}: {msg}")
+        if len(err_rows) > 10:
+            print(f"  ... and {len(err_rows)-10} more.")
+
+    print(f"✅ Complexity DF ready: {len(df)} maps, columns={list(df.columns)}")
+    return df
+# ======== end robust builder ========
+
 
 class ComplexityScheduler:
     """
@@ -1117,3 +1206,5 @@ if __name__ == '__main__':
     # 5) 保存模型
     torch.save(model.state_dict(), 'models/best_model.pt')
     print('✅ 模型已保存到 models/best_model.pt')
+
+

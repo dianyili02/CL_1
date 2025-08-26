@@ -63,8 +63,11 @@ class DDQNAgent:
             replay_buffer_size: int = 1000,
             device: str = 'cpu',
             alpha: float = 0.6,
-            beta: float = 0.4
-        ):
+            beta: float = 0.4,
+            # ↓↓↓ 新增两个可选参数 ↓↓↓
+            use_channels=(1, 0, 3, 2),  # 通道重排：障碍, 自车, 目标, 其他
+            action_map=None):           # 动作索引映射（网络->环境）
+
         self.device = device
         self.action_space = action_space
         self.replay_buffer = PrioritizedReplayBuffer(replay_buffer_size, alpha)
@@ -82,6 +85,10 @@ class DDQNAgent:
         self.epsilon_decay = (initial_epsilon - final_epsilon) / decay_range
         self.optimizer = Adam(self.q_network.parameters(), lr=lr)
         self.beta = beta
+         # 保存设置
+        self.use_channels = tuple(use_channels)
+        # 默认恒等映射 [0,1,2,3,4]；如你之前求得[0,2,1,3,4]就传进来
+        self.action_map = list(action_map) if action_map is not None else list(range(len(self.action_space)))
 
     def save_weights(self, path: str):
         torch.save(self.target_network.state_dict(), path)
@@ -103,14 +110,33 @@ class DDQNAgent:
         for target_param, param in zip(self.target_network.parameters(), self.q_network.parameters()):
             target_param.data.copy_(self.tau * param + (1 - self.tau) * target_param)
 
-    def act(self, state: Dict[str, Any]) -> int:
-        state = state['view_cache']
-        state = torch.from_numpy(state).float().to(self.device).unsqueeze(0)
-        if random.random() <= self.epsilon:
-            return random.choice(self.action_space)
+    # def act(self, state: Dict[str, Any]) -> int:
+    #     state = state['view_cache']
+    #     state = torch.from_numpy(state).float().to(self.device).unsqueeze(0)
+    #     if random.random() <= self.epsilon:
+    #         return random.choice(self.action_space)
+    #     with torch.no_grad():
+    #         q_values = self.q_network(state)
+    #     return torch.argmax(q_values).item()
+    # 测试用
+    def act(self, state):
+        # 1) 从 obs 里拿时序视野并重排通道
+        V = state['view_cache']  # 形状 [T,H,W,C]
+        # 安全转换 + 重排到训练时顺序（我们探针推断为 [障碍, 自车, 目标, 其他] = (1,0,3,2)）
+        V = np.asarray(V, dtype=np.float32)[..., list(self.use_channels)]  # [T,H,W,C']
+        # 转成 [1,C,T,H,W]
+        x = torch.from_numpy(V).permute(3, 0, 1, 2).unsqueeze(0).to(self.device)
+
+        # 2) 前向 & 选网络动作
         with torch.no_grad():
-            q_values = self.q_network(state)
-        return torch.argmax(q_values).item()
+            q = self.q_network(x)
+            net_action = int(torch.argmax(q, dim=1).item())
+
+        # 3) 网络动作 -> 环境动作（如你之前校准出的 [0,2,1,3,4]）
+        env_action = self.action_map[net_action]
+        return env_action
+
+    
 
     def retrain(self, batch_size: int) -> float:
         if len(self.replay_buffer) < batch_size:

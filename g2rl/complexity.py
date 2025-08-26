@@ -349,12 +349,24 @@ def detect_pockets_via_deadends(grid: Array2D, min_size: int = 6, connectivity: 
     return pocket_count
 
 
+# def astar(grid: Array2D, start: Coord, goal: Coord, connectivity: int = 4, max_steps: int = 10000) -> List[Coord]:
+#     """A* on grid, returns path including start and goal; [] if no path."""
+#     h, w = grid.shape
+#     fm = free_mask(grid)
+#     if fm[start] == 0 or fm[goal] == 0:
+#         return []
+
 def astar(grid: Array2D, start: Coord, goal: Coord, connectivity: int = 4, max_steps: int = 10000) -> List[Coord]:
     """A* on grid, returns path including start and goal; [] if no path."""
+    # 确保 start/goal 是 tuple(int,int)
+    start = tuple(map(int, start))
+    goal = tuple(map(int, goal))
+
     h, w = grid.shape
     fm = free_mask(grid)
     if fm[start] == 0 or fm[goal] == 0:
         return []
+
 
     ngh = neighbors_4 if connectivity == 4 else neighbors_8
 
@@ -548,6 +560,98 @@ def deadlock_features(
     }
 
 
+# ------------------ 3.5) Free-space Reachability (FRA) & Detour (FDA) ------------------
+
+def reachability_features(grid: Array2D, connectivity: int = 4) -> Dict[str, float]:
+    """
+    FRA: Free-space Reachability Area ratio
+    = 自由格子图中最大连通分量占全部自由格的比例 ∈ [0,1]。
+    直觉：FRA 越小，空间越碎片化、可达性越差。
+    """
+    G = grid_to_graph(grid, connectivity=connectivity)
+    n = G.number_of_nodes()
+    if n == 0:
+        FRA = 0.0
+    else:
+        GCC = largest_component(G)
+        FRA = float(GCC.number_of_nodes() / n)  # 可达性比例
+
+    # 为了与“难度越大数值越大”的方向一致，构造一个“硬度”项：1 - FRA
+    FRA_hard = 1.0 - FRA
+    return {
+        "FRA": float(FRA),          # 原始可达性
+        "FRA_hard": float(FRA_hard) # 难度方向
+    }
+
+
+def detour_features(
+    grid: Array2D,
+    connectivity: int = 4,
+    sample_pairs: int = 300,
+    random_state=None,
+    detour_cap: float = 3.0,
+) -> Dict[str, float]:
+    """
+    FDA: Free-space Detour Average（归一化）
+    做法：
+      - 在自由格上随机采样若干对 (u,v)，计算网格最短路径长度 d_grid(u,v)，
+        与理想几何距离 d_geo(u,v)（4邻域用曼哈顿，8邻域用切比雪夫）之比 r = d_grid / d_geo。
+      - 对 r 取平均得到 avg_ratio（>=1）。再把 (avg_ratio - 1) / (detour_cap - 1) 截断到 [0,1]。
+    返回：
+      FDA ∈ [0,1]（越大越绕行、越难），以及 avg_ratio 供调参观察。
+    """
+    rng = _rng_from(random_state)
+    fm = free_mask(grid)
+    free_coords = np.argwhere(fm == 1)
+    if len(free_coords) < 2:
+        return {"FDA": 0.0, "FDA_ratio": 1.0}
+
+    # 建图
+    G = grid_to_graph(grid, connectivity=connectivity)
+    nodes = list(G.nodes())
+    if not nodes:
+        return {"FDA": 0.0, "FDA_ratio": 1.0}
+
+    # 几何距离函数（与邻接一致）
+    def geo_dist(a: Coord, b: Coord) -> int:
+        if connectivity == 4:
+            return abs(a[0] - b[0]) + abs(a[1] - b[1])
+        else:
+            return max(abs(a[0] - b[0]), abs(a[1] - b[1]))
+
+    # 采样对
+    S = min(sample_pairs, len(nodes))
+    idx = rng.choice(len(nodes), size=S, replace=False) if S < len(nodes) else np.arange(len(nodes))
+    sampled = [nodes[i] for i in idx]
+
+    # 为加速：对每个 sampled 源做一次单源 BFS，批量取目标
+    ratios = []
+    for s in sampled:
+        lengths = nx.single_source_shortest_path_length(G, s)
+        # 随机抽少量目标（含多样性）
+        targets_idx = rng.choice(len(nodes), size=min(16, len(nodes)), replace=False)
+        for j in targets_idx:
+            t = nodes[j]
+            if t == s:
+                continue
+            d_geo = geo_dist(s, t)
+            if d_geo == 0:
+                continue
+            d_grid = lengths.get(t, None)
+            if d_grid is None:
+                continue
+            ratios.append(float(d_grid) / float(d_geo))
+
+    if not ratios:
+        return {"FDA": 0.0, "FDA_ratio": 1.0}
+
+    avg_ratio = float(np.mean(ratios))  # >= 1
+    # 归一化：把 [1, detour_cap] 映射到 [0,1]
+    FDA = (avg_ratio - 1.0) / max(1e-6, (detour_cap - 1.0))
+    FDA = float(np.clip(FDA, 0.0, 1.0))
+    return {"FDA": FDA, "FDA_ratio": avg_ratio}
+
+
 # ------------------ Top-level complexity ------------------
 
 DEFAULT_WEIGHTS = {
@@ -560,6 +664,9 @@ DEFAULT_WEIGHTS = {
     "BN": 0.20,
     "MC": 0.15,
     "DLR": 0.20,
+    # new (默认先不参与加权；需要时你可以把它们调到非零)
+    "FRA": 0.1,  # 注意：组合时我们用的是 1 - FRA（见 compute_complexity 内部处理）
+    "FDA": 0.1,
 }
 
 
@@ -593,6 +700,10 @@ def compute_complexity(
     mc = connectivity_features(grid, connectivity=connectivity, sample_pairs=200, random_state=random_state)
     dlr = deadlock_features(grid, starts=starts, goals=goals, K=K, connectivity=connectivity,
                             random_state=random_state, max_astar_steps=max_astar_steps)
+        # --- 新增 FRA / FDA ---
+    fra = reachability_features(grid, connectivity=connectivity)  # {"FRA", "FRA_hard"}
+    fda = detour_features(grid, connectivity=connectivity, sample_pairs=300, random_state=random_state)
+
 
     # combine
     wts = dict(DEFAULT_WEIGHTS)
@@ -608,6 +719,9 @@ def compute_complexity(
         "BN": robust_minmax(bn["BN"], 0.0, 1.0),
         "MC": robust_minmax(mc["MC"], 0.0, 1.0),
         "DLR": robust_minmax(dlr["DLR"], 0.0, 1.0),
+        "FRA": robust_minmax(fra["FRA_hard"], 0.0, 1.0),  # 用难度方向 1 - FRA
+        "FDA": robust_minmax(fda["FDA"], 0.0, 1.0),       # 已是 [0,1]
+
     }
 
     # Ensure weights sum to 1
@@ -635,6 +749,9 @@ def compute_complexity(
         **bn,
         **mc,
         **dlr,
+        **fra,   # 提供 FRA 和 FRA_hard
+        **fda,   # 提供 FDA 与 FDA_ratio
+
         # final
         "Complexity": float(Complexity),
         "weights_used": {k: float(wts[k]) for k in feats_01.keys()},
@@ -666,7 +783,7 @@ if __name__ == "__main__":
     # Pretty print a subset
     keys = [
         "Size_raw", "Agents_raw", "Density_raw",
-        "LDD", "BN", "MC", "DLR",
+        "LDD", "BN", "MC", "DLR","FDA","FRA",
         "Complexity"
     ]
     print({k: res[k] for k in keys})

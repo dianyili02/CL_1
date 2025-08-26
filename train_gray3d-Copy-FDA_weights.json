@@ -1,0 +1,42 @@
+{
+  "intercept": 0.5776676117806645,
+  "weights": {
+    "size": 0.0001172746980089754,
+    "num_agents": 7.534595505976682e-11,
+    "density": 0.3637909343760109,
+    "density_actual": 0.06671852329191401,
+    "LDD": 1.8764752338822464,
+    "BN": 2.2524602179375264e-08,
+    "MC": 0.06633616296296739,
+    "DLR": 3.0044684138126564e-09,
+    "FRA": 2.984255626553965e-08,
+    "FDA": 2.0884992362675932e-08
+  },
+  "target": "success_rate",
+  "features_used": [
+    "size",
+    "num_agents",
+    "density",
+    "density_actual",
+    "LDD",
+    "BN",
+    "MC",
+    "DLR",
+    "FRA",
+    "FDA"
+  ],
+  "sign_constraint": {
+    "size": ">=0",
+    "num_agents": ">=0",
+    "density": ">=0",
+    "density_actual": ">=0",
+    "LDD": ">=0",
+    "BN": ">=0",
+    "MC": ">=0",
+    "DLR": ">=0",
+    "FRA": ">=0",
+    "FDA": ">=0"
+  },
+  "l2_lambda": 0.001,
+  "status": "optimal"
+}

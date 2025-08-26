@@ -68,13 +68,23 @@ class G2RLEnv:
             max_episode_steps=max_episode_steps,
             animation=animation)
 
-        self.actions = [
-            ('idle', 0, 0),
-            ('up', -1, 0),
-            ('down', 1, 0),
-            ('left', 0, -1),
-            ('right', 0, 1),
-        ]
+        # self.actions = [
+        #     ('idle', 0, 0),
+        #     ('up', -1, 0),
+        #     ('down', 1, 0),
+        #     ('left', 0, -1),
+        #     ('right', 0, 1),
+        # ]
+        # 测试用
+        # g2rl/environment.py 里（示例）
+        self._actions = {
+            0: (0, 0),   # stay
+            1: (-1, 0),  # up (y-1)
+            2: (1, 0),   # down (y+1)   # ←← 修复：原来是 (0,0) 错了
+            3: (0, -1),  # left (x-1)
+            4: (0, 1),   # right (x+1)
+        }
+
 
     def _get_reward(self, case: int, N: int = 0) -> float:
         rewards = [self.r1, self.r1 + self.r2, self.r1 + N * self.r3]
