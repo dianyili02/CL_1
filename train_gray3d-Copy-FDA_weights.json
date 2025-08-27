@@ -10,7 +10,7 @@
     "MC": 0.06633616296296739,
     "DLR": 3.0044684138126564e-09,
     "FRA": 2.984255626553965e-08,
-    "FDA": 2.0884992362675932e-08
+    "FPA": 2.0884992362675932e-08
   },
   "target": "success_rate",
   "features_used": [
@@ -23,7 +23,7 @@
     "MC",
     "DLR",
     "FRA",
-    "FDA"
+    "FPA"
   ],
   "sign_constraint": {
     "size": ">=0",
@@ -35,8 +35,20 @@
     "MC": ">=0",
     "DLR": ">=0",
     "FRA": ">=0",
-    "FDA": ">=0"
+    "FPA": ">=0"
   },
   "l2_lambda": 0.001,
-  "status": "optimal"
+  "status": "optimal",
+  "metrics_on_fit": {
+    "pearson_r": 0.8251414213819234,
+    "r2": 0.6808466201980645,
+    "mae": 0.04426240866719149,
+    "rmse": 0.058325774334717494,
+    "mape_percent": 5.461838102224823
+  },
+  "diagnostic_figures": {
+    "pred_vs_actual": "C:/Users/MSc_SEIoT_1/MAPF_G2RL-main - train/train_gray3d-Copy-FDA_pred_vs_actual.png",
+    "residual_hist": "C:/Users/MSc_SEIoT_1/MAPF_G2RL-main - train/train_gray3d-Copy-FDA_residual_hist.png",
+    "residuals_vs_fitted": "C:/Users/MSc_SEIoT_1/MAPF_G2RL-main - train/train_gray3d-Copy-FDA_residuals_vs_fitted.png"
+  }
 }
