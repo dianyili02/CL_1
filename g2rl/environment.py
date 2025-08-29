@@ -84,7 +84,24 @@ class G2RLEnv:
             3: (0, -1),  # left (x-1)
             4: (0, 1),   # right (x+1)
         }
+        self._init_actions() 
 
+
+    def _init_actions(self):
+        """
+        确保环境里有动作表和映射。默认 5 个动作：idle/up/down/left/right
+        """
+        if not hasattr(self, "actions") or self.actions is None:
+            self.actions = ['idle', 'up', 'down', 'left', 'right']
+        # 可选：如果你本来就定义了别的动作集，这里别覆盖
+        self._action_to_delta = {
+            'idle':  (0, 0),
+            'up':    (-1, 0),
+            'down':  (1, 0),
+            'left':  (0, -1),
+            'right': (0, 1),
+        }
+        self._n_actions = len(self.actions)
 
     def _get_reward(self, case: int, N: int = 0) -> float:
         rewards = [self.r1, self.r1 + self.r2, self.r1 + N * self.r3]
@@ -156,6 +173,7 @@ class G2RLEnv:
         self.env.save_animation(path)
 
     def get_action_space(self) -> List[int]:
+        self._init_actions() 
         return list(range(len(self.actions)))
 
     def reset(self) -> Tuple[List, List]:
@@ -172,6 +190,7 @@ class G2RLEnv:
             view_cache = [np.zeros_like(view) for _ in range(self.cache_size - 1)] + [view]
             self.view_cache.append(deque(view_cache, self.cache_size))
             self.obs[i]['view_cache'] = np.array(self.view_cache[-1])
+            self._init_actions() 
         # print(f"[env.reset()] Goals 已设置：{self.goals}")
         return self.obs, self.info
 
@@ -217,6 +236,16 @@ class G2RLEnv:
         )
 
     def step(self, actions: List[int]) -> Tuple[List, ...]:
+        self._init_actions() 
+        # 统一为动作名列表
+        norm_actions = []
+        for a in actions:
+            if isinstance(a, int):
+                norm_actions.append(self.actions[a % self._n_actions])
+            else:
+            # 假定已经是字符串动作
+                norm_actions.append(str(a))
+                
         conflict_points = set()
         obs, reward, terminated, truncated, info = self.env.step(actions)
         # calculate reward
@@ -262,6 +291,7 @@ class G2RLEnv:
 
         self.obs, self.info = obs, info
         self.time_idx += 1
+
         return obs, reward, terminated, truncated, info
 
     @staticmethod

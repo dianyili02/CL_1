@@ -188,7 +188,7 @@ def train(
         print(f"[Complexity] {map_name}: "
               f"C={res['Complexity']:.3f} | LDD={res['LDD']:.3f} BN={res['BN']:.3f} "
               f"MC={res['MC']:.3f} DLR={res['DLR']:.3f} FRA={res.get('FRA',0.0):.3f} "
-              f"FDA={res.get('FDA',0.0):.3f}")
+              f"FPA={res.get('FDA',0.0):.3f}")
 
         # 记录，稍后可排序或写 CSV
         maps_with_scores.append((m, res))
@@ -211,9 +211,9 @@ def train(
                 "MC": float(res["MC"]),
                 "DLR": float(res["DLR"]),
                 "FRA": float(res.get("FRA", 0.0)),
-                "FDA": float(res.get("FDA", 0.0)),
+                "FPA": float(res.get("FDA", 0.0)),
                 "FRA_hard": float(res.get("FRA_hard", 0.0)),
-                "FDA_ratio": float(res.get("FDA_ratio", 1.0)),
+                "FPA_ratio": float(res.get("FDA_ratio", 1.0)),
                 "Complexity": float(res["Complexity"]),
             }
             _append_csv(csv_path, csv_row)

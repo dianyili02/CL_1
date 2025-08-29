@@ -24,26 +24,25 @@ if PROJECT_ROOT not in sys.path:
 from g2rl.environment import G2RLEnv
 from g2rl.agent import DDQNAgent
 from g2rl.network import CRNNModel
-from g2rl.complexity_module import compute_map_complexity  # 仅用来取 LDD/BN/MC/DLR
+from g2rl.complexity import compute_complexity  # 仅用来取 LDD/BN/MC/DLR
 from pogema import AStarAgent
 
-# # ====================== 新的“z-score”复杂度公式 ======================
+
 # ====================== 更新的“z-score”复杂度公式 ======================
-NEW_INTERCEPT = 0.848000
+NEW_INTERCEPT = 0.8498563938534148
 Z_COEFFS = {
-    "size":            +0.021643,
-    "num_agents":      -0.010270,
-    "density":         -0.003044,
-    "density_actual":  +0.094523,
-    "LDD":             +0.021963,
-    "BN":              -0.092417,
-    "MC":              +0.033021,
-    "DLR":             +0.003857,
-    "FPA":             -0.058766,   # 新增 FPA 特征
-    "FRA":             -0.024654,   # 新增 FRA 特征
+    "size":           -0.053114841431693365,
+    "num_agents":     +0.2522555834547447,
+    "density":        -0.024373645110113036,
+    "density_actual": -0.022860995775357107,
+    "LDD":            -0.07455248304868833,
+    "BN":             +0.04608927828640109,
+    "MC":             +0.08999452177843661,
+    "DLR":            +0.07483901107179369,
+    "FRA":            +0.04616983038496823,
+    "FPA":            +0.05103388422320293,
 }
 Z_FEATURE_KEYS = list(Z_COEFFS.keys())
-
 
 # ------------------------- Data structures -------------------------
 @dataclass
@@ -375,7 +374,7 @@ def sample_grid_maps() -> List[MapRecord]:
                 LDD = BN = MC = DLR = np.nan
                 FPA = FRA = np.nan   # 🔑 给默认值，避免 UnboundLocalError
                 try:
-                    comp = compute_map_complexity(grid)  # 你的模块：返回结构可能是 dict / tuple
+                    comp = compute_complexity(grid)  # 你的模块：返回结构可能是 dict / tuple
                     # 宽松解析：
                     if isinstance(comp, dict):
                         LDD = float(comp.get("LDD", np.nan))
