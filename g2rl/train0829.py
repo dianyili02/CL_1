@@ -635,8 +635,12 @@ def train(
         })
 
         # —— 课程晋级
+                # ===== 5) 课程逻辑：自动晋级 / 重练 =====
         if scheduler is not None:
+            # 把本集结果写入滑窗/阶段统计
             scheduler.add_episode_result(int(success_flag))
+
+            # 已满足窗口/阶段成功率 + 已达最少集数 -> 自动晋级
             if scheduler.should_advance():
                 # 以晋级前的 stage_id 做 checkpoint 命名
                 ckpt_path = Path("models") / f"stage{stage_id}_passed.pt"
@@ -651,6 +655,10 @@ def train(
                 if scheduler.is_done():
                     pbar.write("🎉 所有阶段完成，训练结束！")
                     break
+
+                # 晋级后下一集会自动从新阶段的地图池里取图（while 顶部会重新 get_updated_map_settings）
+            
+            # 没达到阈值但已经跑满最少集数 -> 重复当前阶段（重置统计重新来过）
             elif scheduler._ep_in_stage >= scheduler.min_episodes_per_stage:
                 pbar.write(
                     f"🔁 Stage {scheduler.current_stage} 未达标："
