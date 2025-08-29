@@ -1496,7 +1496,7 @@ from tqdm import tqdm
 from pogema import AStarAgent
 
 # ============ 项目根路径 ============
-project_root = r"C:/Users/MSc_SEIoT_1/MAPF_G2RL-main-train"
+project_root = r"C:/Users/MSc_SEIoT_1/MAPF_G2RL-main-nn"
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 

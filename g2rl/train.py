@@ -502,295 +502,18 @@ def get_normalized_probs(x: Union[List[float], None], size: int) -> np.ndarray:
     return e_x / e_x.sum(axis=0)
 
 
-# def train(
-#         # model: torch.nn.Module,
-#         # scheduler: CurriculumScheduler,
-#         # map_settings: Dict[str, dict],
-#         # map_probs: Union[List[float], None],
-#         # num_episodes: int = 300,
-#         # batch_size: int = 32,
-#         # decay_range: int = 1000,
-#         # log_dir = 'logs',
-#         # lr: float = 0.001,
-#         # replay_buffer_size: int = 1000,
-#         # device: str = 'cuda'
-#         model: torch.nn.Module,
-#         map_settings: Dict[str, dict],
-#         map_probs: Union[List[float], None],
-#         num_episodes: int = 300,
-#         batch_size: int = 32,
-#         decay_range: int = 1000,
-#         log_dir='logs',
-#         lr: float = 0.001,
-#         replay_buffer_size: int = 1000,
-#         device: str = 'cuda',
-#         scheduler: Optional[CurriculumScheduler] = None,  # ← 可选+默认
-#         max_episode_seconds: int = 30
-#     ) -> DDQNAgent:
-#     timestamp = get_timestamp()
-#     writer = SummaryWriter(log_dir=Path(log_dir) / timestamp)
-#     # maps = [G2RLEnv(**args) for _, args in map_settings.items()]
-#     # maps = [G2RLEnv(**map_settings[name]) for name in map_settings]
-#     maps = []
-    
-#     for name in map_settings:
-#         env = G2RLEnv(**map_settings[name])
-#         # print(f"✅ 初始化 env：{env}")
-#         # print(f"✅ env.reset: {env.reset}")
-#         maps.append(env)
-#     # map_probs = get_normalized_probs(map_probs, len(maps))
-#     map_probs = map_probs or [1.0 / len(maps)] * len(maps)
-#     agent = DDQNAgent(
-#         model,
-#         maps[0].get_action_space(),
-#         lr=lr,
-#         decay_range=decay_range,
-#         device=device,
-#         replay_buffer_size=replay_buffer_size,
-#     )
-
-#     pbar = tqdm(range(num_episodes), desc='Episodes', dynamic_ncols=True)
-    
-    
-#     # Curriculum Learning 阶段统计器
-#     episode = 0
-#     success_count = 0
-#     stage_success_count = 0
-#     stage_episode_count = 0
-
-#     # 记录每个阶段的评估结果
-
-
-#     episode_logs = []  # 👈 放在 train() 最前面
-
-
-
-#     # for episode in pbar:
-#     while scheduler.current_stage <= scheduler.max_stage:
-#         # scheduler.step(episode)
-
-
-#         # 手动地图选择（只训练该地图）
-#         # if episode == 0:
-#         # # ✅ 只在首个 episode 选择地图
-#         #     map_settings = scheduler.get_updated_map_settings()
-#         #     pbar.write(f"📶 当前训练阶段：Stage {scheduler.current_stage}")
-#         #     env, map_type = G2RLEnv.select_map_env(map_settings)
-#         #     pbar.write(f"🟢 首次选择地图：{map_type}")
-#         #     pbar.write(f"👥 当前 Agent 数量：{env.num_agents}")
-            
-
-#         # else:
-#         #     pbar.write(f"🔁 继续使用地图：{map_type}")
-#         map_settings = map_settings
-#         map_type, cfg = next(iter(map_settings.items()))   # 直接取第一项
-#         env = G2RLEnv(**cfg)
-#         pbar.write(f"🟢 使用地图：{map_type}")
-#         maps = [env]
-#         # torch.save(model.state_dict(), f'models/{timestamp}.pt')
-#         stage = scheduler.current_stage
-#         num_agents = env.num_agents  # 当前环境中的 agent 数量
-#         model_name = f"models/g2rl_cl_stage{stage}_agents{num_agents}.pt"
-#         torch.save(model.state_dict(), model_name)
-#         # env, map_type = G2RLEnv.select_map_env(map_settings)
-#         # print(f"[DEBUG] env 类型: {type(env)}")
-#         # print(f"[DEBUG] env.reset 函数：{env.reset}")
-#         # print(f"✅ 当前 environment.py 路径: {G2RLEnv.__module__} 来自 {__import__('g2rl.environment').__file__}")
-        
-#         obs, info = env.reset()
-#         pbar.write(f"🗺️ Episode {episode} using map: {map_type}")
-        
-#         # print("✅ 是否有 goals？", hasattr(env, 'goals'))
-#         # print("✅ env.goals:", getattr(env, 'goals', None))
-#         target_idx = np.random.randint(env.num_agents)
-#         agents = [agent if i == target_idx else AStarAgent() for i in range(env.num_agents)]
-#         goal = tuple(env.goals[target_idx]) 
-#         state = obs[target_idx]
-#         # opt_path = [state['global_xy']] + env.global_guidance[target_idx]
-#          # 获取真实目标
-#         opt_path = [state['global_xy']] + env.global_guidance[target_idx]
-
-#         success_flag = False
-        
-#         retrain_count = 0
-#         scalars = {
-#             'Reward': 0,
-#             'Moving Cost': 0,
-#             'Detour Percentage': 0,
-#             'Average Loss': 0,
-#             'Average Epsilon': 0,
-#         }
-
-#         timesteps_per_episode = 50 + 10 * episode
-#         episode_start_time = time.time()
-#         for timestep in range(timesteps_per_episode):
-#             if time.time() - episode_start_time > 30:
-#                 pbar.write(f"⏰ Episode {episode} 超时（>30秒），强制终止本 episode")
-#                 break
-#             actions = [agent.act(ob) for agent, ob in zip(agents, obs)]
-#             obs, reward, terminated, truncated, info = env.step(actions)
-#             # terminated[target_idx] = obs[target_idx]['global_xy'] == opt_path[-1]
-#             agent_pos = tuple(obs[target_idx]['global_xy'])
-            
-#             terminated[target_idx] = agent_pos == goal
-#             # print(f"[EP {episode}] Agent pos: {agent_pos}, goal: {goal}, success: {terminated[target_idx]}")
-
-
-#             # if the target agent has finished or FOV does not contain the global guidance
-
-#             if terminated[target_idx]:
-#                 success_flag = True
-#                 scalars['Success'] = 1
-#                 scalars['Moving Cost'] = moving_cost(timestep + 1, opt_path[0], opt_path[-1])
-#                 scalars['Detour Percentage'] = detour_percentage(timestep + 1, len(opt_path) - 1)
-#                 break
-            
-#             # 提取状态特征矩阵
-#             if isinstance(state, dict) and 'obs' in state:
-#                 obs_dict = state['obs']
-#             else:
-#                 obs_dict = state
-
-# # 常见输入是 'view_cache'
-#             if 'view_cache' in obs_dict:
-#                 state_obs = obs_dict['view_cache']  # shape 通常为 [T, H, W, C]
-#             else:
-#                 raise ValueError(f"❌ state['obs'] 缺少 'view_cache'，目前内容为: {obs_dict.keys()}")
-
-# # 转换成 tensor，shape: [1, T, H, W, C] → 输入 CRNN
-#             state_tensor = torch.tensor(state_obs[..., :512], dtype=torch.float32).unsqueeze(0).to(device)
-
-#             agent.store(
-#                 state,
-#                 actions[target_idx],
-#                 reward[target_idx],
-#                 obs[target_idx],
-#                 terminated[target_idx],
-#             )
-#             state = obs[target_idx]
-#             scalars['Reward'] += reward[target_idx]
-
-#             if len(agent.replay_buffer) >= batch_size:
-#                 retrain_count += 1
-#                 scalars['Average Loss'] += agent.retrain(batch_size)
-#                 scalars['Average Epsilon'] += round(agent.epsilon, 4)
-
-        
-#         # if success_flag:
-#         #     stage_success_count += scalars['Success']
-#         #     stage_episode_count += 1
-#         #     episode += 1
-#         # else:
-#         #     scalars['Success'] = 0  # ❌ 没有成功
-
-#         if not success_flag:
-#             scalars['Success'] = 0
-#         else:
-#             success_count += 1
-#             stage_success_count += 1
-
-#         stage_episode_count += 1
-#         episode += 1
-#         pbar.update(1)
-
-        
-
-#         for name in scalars.keys():
-#             if 'Average' in name and retrain_count > 0:
-#                 scalars[name] /= retrain_count
-
-#         # logging
-#         for name, value in scalars.items():
-#             writer.add_scalar(name, value, episode)
-#         # pbar.update(1)
-#         pbar.set_postfix(scalars)
-
-#         if scalars['Success'] == 1:
-#             pbar.write(f"[EP {episode}] ✅ 成功：Agent pos: {tuple(map(int, state['global_xy']))}, goal: {goal}")
-#         else:
-#             pbar.write(f"[EP {episode}] ❌ 失败：Agent pos: {tuple(map(int, state['global_xy']))}, goal: {goal}")
-#         pbar.write(f"⭐ 当前累计成功率：{success_count / (episode + 1) * 100:.2f}% ({success_count}/{episode + 1})")  #从训练开始到当前 episode 为止的总成功率 
-#         # pbar.write(f"📊 当前阶段成功率: {success_rate:.2f}")  #只统计当前 Curriculum Learning 阶段（Stage）中的成功率
-        
-#                 # ✅ 记录当前 episode 的训练统计信息
-# #         episode_logs.append({
-# #     'Episode': episode,
-# #     'Size': env.grid_config.size,
-# #     'Agents': env.num_agents,
-# #     'Density': env.grid_config.density,
-# #     'Success': scalars['Success'],
-# #     'Reward': scalars['Reward'],
-# #     'Moving Cost': scalars['Moving Cost'],
-# #     'Detour Percentage': scalars['Detour Percentage'],
-# #     'Average Loss': scalars['Average Loss'],
-# #     'Average Epsilon': scalars['Average Epsilon'],
-# # })
-# #         episode_logs.append({
-# #     'Episode': episode,
-# #     'Size': env.grid_config.size,
-# #     'Agents': env.num_agents,
-# #     'Density': env.grid_config.density,
-# #     'Success': scalars['Success'],
-# #     'Reward': scalars['Reward'],
-# #     'Moving Cost': scalars['Moving Cost'],
-# #     'Detour Percentage': scalars['Detour Percentage'],
-# #     'Average Loss': scalars['Average Loss'],
-# #     'Average Epsilon': scalars['Average Epsilon'],
-# #     'Complexity': predict_complexity(env)  # ✅ 新增
-# # })
-
-
-
-
-
-#         if stage_episode_count >= scheduler.episodes_per_stage:
-#             success_rate = stage_success_count / stage_episode_count
-#             # pbar.write(f"⭐ 当前累计成功率：{success_count / (episode + 1) * 100:.2f}% ({success_count}/{episode + 1})")  #从训练开始到当前 episode 为止的总成功率 
-            
-#             previous_stage = scheduler.current_stage
-#             scheduler.update(success_rate, pbar)
-            
-
-#             user_input = input(f"🚦 Stage {scheduler.current_stage - 1} 完成。是否继续训练？(y/n): ")
-#             if user_input.lower() != 'y':
-#                 pbar.write("🛑 用户选择终止训练")
-#                 torch.save(model.state_dict(), f'models/stage{scheduler.current_stage - 1}_final.pt')
-#                 plot_training_results(episode_logs, save_path='training_plot.png')
-#                 writer.close()
-#                 return agent
-#             # 重置阶段内计数器
-#             stage_success_count = 0
-#             stage_episode_count = 0
-
-
-#             if scheduler.current_stage == 4:
-#                 pbar.write("🛑 已完成 Stage 3，训练自动终止")
-#                 torch.save(model.state_dict(), f'models/stage3_final.pt')
-#                 writer.close()
-#                 return agent
-    
-
-#             if scheduler.current_stage != previous_stage:
-#                 map_settings = scheduler.get_updated_map_settings()
-#                 env, map_type = G2RLEnv.select_map_env(map_settings)
-#                 pbar.write(f"🆕 晋级后重新选择地图：{map_type}")
-#                 pbar.write(f"👥 当前 Agent 数量：{env.num_agents}")
-
-
-#             if scheduler.current_stage > scheduler.max_stage:
-#                 pbar.write("🎉 所有阶段完成，训练结束！")
-#                 break
-
-#     # plot_training_results(episode_logs, save_path='training_plot.png')
-#     # df_logs = pd.DataFrame(episode_logs)
-#     # df_logs.to_csv('logs/episode_logs.csv', index=False, encoding='utf-8-sig')
-#     # pbar.write("📄 episode_logs 已保存为 logs/episode_logs.csv")
-
-#     writer.close()
-#     return agent
-
-
 def train(
+        # model: torch.nn.Module,
+        # scheduler: CurriculumScheduler,
+        # map_settings: Dict[str, dict],
+        # map_probs: Union[List[float], None],
+        # num_episodes: int = 300,
+        # batch_size: int = 32,
+        # decay_range: int = 1000,
+        # log_dir = 'logs',
+        # lr: float = 0.001,
+        # replay_buffer_size: int = 1000,
+        # device: str = 'cuda'
         model: torch.nn.Module,
         map_settings: Dict[str, dict],
         map_probs: Union[List[float], None],
@@ -801,21 +524,22 @@ def train(
         lr: float = 0.001,
         replay_buffer_size: int = 1000,
         device: str = 'cuda',
-        scheduler: Optional[CurriculumScheduler] = None,  # 自动晋级/重复用
+        scheduler: Optional[CurriculumScheduler] = None,  # ← 可选+默认
         max_episode_seconds: int = 30
     ) -> DDQNAgent:
-
     timestamp = get_timestamp()
     writer = SummaryWriter(log_dir=Path(log_dir) / timestamp)
-
-    # 环境/agent
+    # maps = [G2RLEnv(**args) for _, args in map_settings.items()]
+    # maps = [G2RLEnv(**map_settings[name]) for name in map_settings]
     maps = []
+    
     for name in map_settings:
         env = G2RLEnv(**map_settings[name])
+        # print(f"✅ 初始化 env：{env}")
+        # print(f"✅ env.reset: {env.reset}")
         maps.append(env)
+    # map_probs = get_normalized_probs(map_probs, len(maps))
     map_probs = map_probs or [1.0 / len(maps)] * len(maps)
-
-    # 用第一个 env 的动作空间初始化 agent
     agent = DDQNAgent(
         model,
         maps[0].get_action_space(),
@@ -826,76 +550,116 @@ def train(
     )
 
     pbar = tqdm(range(num_episodes), desc='Episodes', dynamic_ncols=True)
-
-    # 训练计数器
+    
+    
+    # Curriculum Learning 阶段统计器
     episode = 0
-    success_count_total = 0
-
-    # 阶段计数器（用于“到达阶段上限但未达标→重复”）
+    success_count = 0
     stage_success_count = 0
     stage_episode_count = 0
 
-    # —— 阈值：优先用 scheduler.threshold，否则回退到 0.8
-    stage_threshold = getattr(scheduler, "threshold", 0.8)
+    # 记录每个阶段的评估结果
 
-    # 主循环：直到所有阶段完成或达到总 episodes 上限
-    while (scheduler is None) or (scheduler.current_stage <= scheduler.max_stage):
-        if episode >= num_episodes:
-            break
 
-        # 1) 获取“当前阶段”的地图配置，重建 env
-        cur_map_cfg = scheduler.get_updated_map_settings() if scheduler else map_settings
-        map_type, cfg = next(iter(cur_map_cfg.items()))
+    episode_logs = []  # 👈 放在 train() 最前面
+
+
+
+    # for episode in pbar:
+    while scheduler.current_stage <= scheduler.max_stage:
+        # scheduler.step(episode)
+
+
+        # 手动地图选择（只训练该地图）
+        # if episode == 0:
+        # # ✅ 只在首个 episode 选择地图
+        #     map_settings = scheduler.get_updated_map_settings()
+        #     pbar.write(f"📶 当前训练阶段：Stage {scheduler.current_stage}")
+        #     env, map_type = G2RLEnv.select_map_env(map_settings)
+        #     pbar.write(f"🟢 首次选择地图：{map_type}")
+        #     pbar.write(f"👥 当前 Agent 数量：{env.num_agents}")
+            
+
+        # else:
+        #     pbar.write(f"🔁 继续使用地图：{map_type}")
+        map_settings = map_settings
+        map_type, cfg = next(iter(map_settings.items()))   # 直接取第一项
         env = G2RLEnv(**cfg)
-        pbar.write(f"🟢 使用地图：{map_type} | Stage {scheduler.current_stage if scheduler else '-'} | Agents={env.num_agents}")
-
-        # 2) reset & 准备一集
+        pbar.write(f"🟢 使用地图：{map_type}")
+        maps = [env]
+        # torch.save(model.state_dict(), f'models/{timestamp}.pt')
+        stage = scheduler.current_stage
+        num_agents = env.num_agents  # 当前环境中的 agent 数量
+        model_name = f"models/g2rl_cl_stage{stage}_agents{num_agents}.pt"
+        torch.save(model.state_dict(), model_name)
+        # env, map_type = G2RLEnv.select_map_env(map_settings)
+        # print(f"[DEBUG] env 类型: {type(env)}")
+        # print(f"[DEBUG] env.reset 函数：{env.reset}")
+        # print(f"✅ 当前 environment.py 路径: {G2RLEnv.__module__} 来自 {__import__('g2rl.environment').__file__}")
+        
         obs, info = env.reset()
+        pbar.write(f"🗺️ Episode {episode} using map: {map_type}")
+        
+        # print("✅ 是否有 goals？", hasattr(env, 'goals'))
+        # print("✅ env.goals:", getattr(env, 'goals', None))
         target_idx = np.random.randint(env.num_agents)
         agents = [agent if i == target_idx else AStarAgent() for i in range(env.num_agents)]
-        goal = tuple(env.goals[target_idx])
+        goal = tuple(env.goals[target_idx]) 
         state = obs[target_idx]
+        # opt_path = [state['global_xy']] + env.global_guidance[target_idx]
+         # 获取真实目标
         opt_path = [state['global_xy']] + env.global_guidance[target_idx]
 
         success_flag = False
+        
         retrain_count = 0
         scalars = {
-            'Reward': 0.0,
-            'Moving Cost': 0.0,
-            'Detour Percentage': 0.0,
-            'Average Loss': 0.0,
-            'Average Epsilon': 0.0,
-            'Success': 0
+            'Reward': 0,
+            'Moving Cost': 0,
+            'Detour Percentage': 0,
+            'Average Loss': 0,
+            'Average Epsilon': 0,
         }
 
-        # 3) 跑一集
         timesteps_per_episode = 50 + 10 * episode
         episode_start_time = time.time()
-
         for timestep in range(timesteps_per_episode):
-            # 超时保护
-            if time.time() - episode_start_time > max_episode_seconds:
-                pbar.write(f"⏰ Episode {episode} 超时（>{max_episode_seconds}s），强制终止本 episode")
+            if time.time() - episode_start_time > 30:
+                pbar.write(f"⏰ Episode {episode} 超时（>30秒），强制终止本 episode")
                 break
-
-            actions = [ag.act(o) for ag, o in zip(agents, obs)]
+            actions = [agent.act(ob) for agent, ob in zip(agents, obs)]
             obs, reward, terminated, truncated, info = env.step(actions)
-
-            # 到达目标判定
+            # terminated[target_idx] = obs[target_idx]['global_xy'] == opt_path[-1]
             agent_pos = tuple(obs[target_idx]['global_xy'])
-            done = (agent_pos == goal)
-            terminated[target_idx] = done
+            
+            terminated[target_idx] = agent_pos == goal
+            # print(f"[EP {episode}] Agent pos: {agent_pos}, goal: {goal}, success: {terminated[target_idx]}")
 
-            if done:
+
+            # if the target agent has finished or FOV does not contain the global guidance
+
+            if terminated[target_idx]:
                 success_flag = True
                 scalars['Success'] = 1
                 scalars['Moving Cost'] = moving_cost(timestep + 1, opt_path[0], opt_path[-1])
                 scalars['Detour Percentage'] = detour_percentage(timestep + 1, len(opt_path) - 1)
                 break
+            
+            # 提取状态特征矩阵
+            if isinstance(state, dict) and 'obs' in state:
+                obs_dict = state['obs']
+            else:
+                obs_dict = state
 
-            # 采样&学习
-            # —— 你的状态提取逻辑（尽量使用 obs[target_idx]，不要用旧 state 里的 'obs'）——
-            # 这里保留你的原实现，注意 state 的更新放在最后
+# 常见输入是 'view_cache'
+            if 'view_cache' in obs_dict:
+                state_obs = obs_dict['view_cache']  # shape 通常为 [T, H, W, C]
+            else:
+                raise ValueError(f"❌ state['obs'] 缺少 'view_cache'，目前内容为: {obs_dict.keys()}")
+
+# 转换成 tensor，shape: [1, T, H, W, C] → 输入 CRNN
+            state_tensor = torch.tensor(state_obs[..., :512], dtype=torch.float32).unsqueeze(0).to(device)
+
             agent.store(
                 state,
                 actions[target_idx],
@@ -904,83 +668,319 @@ def train(
                 terminated[target_idx],
             )
             state = obs[target_idx]
-            scalars['Reward'] += float(reward[target_idx])
+            scalars['Reward'] += reward[target_idx]
 
             if len(agent.replay_buffer) >= batch_size:
                 retrain_count += 1
-                scalars['Average Loss'] += float(agent.retrain(batch_size))
-                scalars['Average Epsilon'] += float(agent.epsilon)
+                scalars['Average Loss'] += agent.retrain(batch_size)
+                scalars['Average Epsilon'] += round(agent.epsilon, 4)
 
-        # 4) 统计本集
-        if retrain_count > 0:
-            scalars['Average Loss'] /= retrain_count
-            scalars['Average Epsilon'] /= retrain_count
+        
+        # if success_flag:
+        #     stage_success_count += scalars['Success']
+        #     stage_episode_count += 1
+        #     episode += 1
+        # else:
+        #     scalars['Success'] = 0  # ❌ 没有成功
 
-        if success_flag:
-            success_count_total += 1
+        if not success_flag:
+            scalars['Success'] = 0
+        else:
+            success_count += 1
             stage_success_count += 1
-        scalars['Success'] = 1 if success_flag else 0
 
         stage_episode_count += 1
         episode += 1
         pbar.update(1)
 
+        
+
+        for name in scalars.keys():
+            if 'Average' in name and retrain_count > 0:
+                scalars[name] /= retrain_count
+
         # logging
         for name, value in scalars.items():
             writer.add_scalar(name, value, episode)
+        # pbar.update(1)
+        pbar.set_postfix(scalars)
 
-        pbar.set_postfix(
-            Stage=(scheduler.current_stage if scheduler else "-"),
-            SR_total=f"{success_count_total / max(1, episode):.2f}",
-            R=f"{scalars['Reward']:.2f}",
-        )
+        if scalars['Success'] == 1:
+            pbar.write(f"[EP {episode}] ✅ 成功：Agent pos: {tuple(map(int, state['global_xy']))}, goal: {goal}")
+        else:
+            pbar.write(f"[EP {episode}] ❌ 失败：Agent pos: {tuple(map(int, state['global_xy']))}, goal: {goal}")
+        pbar.write(f"⭐ 当前累计成功率：{success_count / (episode + 1) * 100:.2f}% ({success_count}/{episode + 1})")  #从训练开始到当前 episode 为止的总成功率 
+        # pbar.write(f"📊 当前阶段成功率: {success_rate:.2f}")  #只统计当前 Curriculum Learning 阶段（Stage）中的成功率
+        
+                # ✅ 记录当前 episode 的训练统计信息
+#         episode_logs.append({
+#     'Episode': episode,
+#     'Size': env.grid_config.size,
+#     'Agents': env.num_agents,
+#     'Density': env.grid_config.density,
+#     'Success': scalars['Success'],
+#     'Reward': scalars['Reward'],
+#     'Moving Cost': scalars['Moving Cost'],
+#     'Detour Percentage': scalars['Detour Percentage'],
+#     'Average Loss': scalars['Average Loss'],
+#     'Average Epsilon': scalars['Average Epsilon'],
+# })
+#         episode_logs.append({
+#     'Episode': episode,
+#     'Size': env.grid_config.size,
+#     'Agents': env.num_agents,
+#     'Density': env.grid_config.density,
+#     'Success': scalars['Success'],
+#     'Reward': scalars['Reward'],
+#     'Moving Cost': scalars['Moving Cost'],
+#     'Detour Percentage': scalars['Detour Percentage'],
+#     'Average Loss': scalars['Average Loss'],
+#     'Average Epsilon': scalars['Average Epsilon'],
+#     'Complexity': predict_complexity(env)  # ✅ 新增
+# })
 
-        # 5) 把结果写进 scheduler 的滑窗，并判定晋级/重复
-        if scheduler is not None:
-            scheduler.add_episode_result(scalars['Success'])
-            window_sr = scheduler.current_window_sr()
 
-            # 到达阶段上限：根据阶段成功率（而非滑窗）做一次硬判定
-            if stage_episode_count >= scheduler.episodes_per_stage:
-                stage_sr = stage_success_count / max(1, stage_episode_count)
-                if stage_sr >= stage_threshold:
-                    scheduler.advance(pbar)
-                    # 重置阶段计数器
-                    stage_success_count = 0
-                    stage_episode_count = 0
-                    # 最后一阶段且已达标可早停
-                    if scheduler.is_done():
-                        break
-                    # 进入下一循环会按新阶段配置重建 env
-                    continue
-                else:
-                    # 未达标：重复当前 stage
-                    scheduler.repeat_stage(pbar)
-                    stage_success_count = 0
-                    stage_episode_count = 0
-                    # 继续在当前 stage 训练
-                    continue
 
-            # 可选：如果你更偏好“滑窗达标立刻晋级”，也保留这条快速通道
-            if scheduler.ready_to_advance():
-                scheduler.advance(pbar)
-                stage_success_count = 0
-                stage_episode_count = 0
-                if scheduler.is_done():
-                    break
-                continue
 
-    # 结束：记录最终成功率（用滑窗或全局）
-    # ✅ 只用全局：所有 episode 成功数 / 所有 episode 数
-    final_sr = success_count_total / max(1, episode)
-    agent.final_success_rate = float(final_sr)
 
-# （可选）调试一下，确认口径
-    print(f"[train] final_sr(global) = {success_count_total}/{episode} = {agent.final_success_rate:.6f}")
+        if stage_episode_count >= scheduler.episodes_per_stage:
+            success_rate = stage_success_count / stage_episode_count
+            # pbar.write(f"⭐ 当前累计成功率：{success_count / (episode + 1) * 100:.2f}% ({success_count}/{episode + 1})")  #从训练开始到当前 episode 为止的总成功率 
+            
+            previous_stage = scheduler.current_stage
+            scheduler.update(success_rate, pbar)
+            
 
+            user_input = input(f"🚦 Stage {scheduler.current_stage - 1} 完成。是否继续训练？(y/n): ")
+            if user_input.lower() != 'y':
+                pbar.write("🛑 用户选择终止训练")
+                torch.save(model.state_dict(), f'models/stage{scheduler.current_stage - 1}_final.pt')
+                plot_training_results(episode_logs, save_path='training_plot.png')
+                writer.close()
+                return agent
+            # 重置阶段内计数器
+            stage_success_count = 0
+            stage_episode_count = 0
+
+
+            if scheduler.current_stage == 4:
+                pbar.write("🛑 已完成 Stage 3，训练自动终止")
+                torch.save(model.state_dict(), f'models/stage3_final.pt')
+                writer.close()
+                return agent
+    
+
+            if scheduler.current_stage != previous_stage:
+                map_settings = scheduler.get_updated_map_settings()
+                env, map_type = G2RLEnv.select_map_env(map_settings)
+                pbar.write(f"🆕 晋级后重新选择地图：{map_type}")
+                pbar.write(f"👥 当前 Agent 数量：{env.num_agents}")
+
+
+            if scheduler.current_stage > scheduler.max_stage:
+                pbar.write("🎉 所有阶段完成，训练结束！")
+                break
+
+    # plot_training_results(episode_logs, save_path='training_plot.png')
+    # df_logs = pd.DataFrame(episode_logs)
+    # df_logs.to_csv('logs/episode_logs.csv', index=False, encoding='utf-8-sig')
+    # pbar.write("📄 episode_logs 已保存为 logs/episode_logs.csv")
 
     writer.close()
     return agent
+
+
+# def train(
+#         model: torch.nn.Module,
+#         map_settings: Dict[str, dict],
+#         map_probs: Union[List[float], None],
+#         num_episodes: int = 300,
+#         batch_size: int = 32,
+#         decay_range: int = 1000,
+#         log_dir='logs',
+#         lr: float = 0.001,
+#         replay_buffer_size: int = 1000,
+#         device: str = 'cuda',
+#         scheduler: Optional[CurriculumScheduler] = None,  # 自动晋级/重复用
+#         max_episode_seconds: int = 30
+#     ) -> DDQNAgent:
+
+#     timestamp = get_timestamp()
+#     writer = SummaryWriter(log_dir=Path(log_dir) / timestamp)
+
+#     # 环境/agent
+#     maps = []
+#     for name in map_settings:
+#         env = G2RLEnv(**map_settings[name])
+#         maps.append(env)
+#     map_probs = map_probs or [1.0 / len(maps)] * len(maps)
+
+#     # 用第一个 env 的动作空间初始化 agent
+#     agent = DDQNAgent(
+#         model,
+#         maps[0].get_action_space(),
+#         lr=lr,
+#         decay_range=decay_range,
+#         device=device,
+#         replay_buffer_size=replay_buffer_size,
+#     )
+
+#     pbar = tqdm(range(num_episodes), desc='Episodes', dynamic_ncols=True)
+
+#     # 训练计数器
+#     episode = 0
+#     success_count_total = 0
+
+#     # 阶段计数器（用于“到达阶段上限但未达标→重复”）
+#     stage_success_count = 0
+#     stage_episode_count = 0
+
+#     # —— 阈值：优先用 scheduler.threshold，否则回退到 0.8
+#     stage_threshold = getattr(scheduler, "threshold", 0.8)
+
+#     # 主循环：直到所有阶段完成或达到总 episodes 上限
+#     while (scheduler is None) or (scheduler.current_stage <= scheduler.max_stage):
+#         if episode >= num_episodes:
+#             break
+
+#         # 1) 获取“当前阶段”的地图配置，重建 env
+#         cur_map_cfg = scheduler.get_updated_map_settings() if scheduler else map_settings
+#         map_type, cfg = next(iter(cur_map_cfg.items()))
+#         env = G2RLEnv(**cfg)
+#         pbar.write(f"🟢 使用地图：{map_type} | Stage {scheduler.current_stage if scheduler else '-'} | Agents={env.num_agents}")
+
+#         # 2) reset & 准备一集
+#         obs, info = env.reset()
+#         target_idx = np.random.randint(env.num_agents)
+#         agents = [agent if i == target_idx else AStarAgent() for i in range(env.num_agents)]
+#         goal = tuple(env.goals[target_idx])
+#         state = obs[target_idx]
+#         opt_path = [state['global_xy']] + env.global_guidance[target_idx]
+
+#         success_flag = False
+#         retrain_count = 0
+#         scalars = {
+#             'Reward': 0.0,
+#             'Moving Cost': 0.0,
+#             'Detour Percentage': 0.0,
+#             'Average Loss': 0.0,
+#             'Average Epsilon': 0.0,
+#             'Success': 0
+#         }
+
+#         # 3) 跑一集
+#         timesteps_per_episode = 50 + 10 * episode
+#         episode_start_time = time.time()
+
+#         for timestep in range(timesteps_per_episode):
+#             # 超时保护
+#             if time.time() - episode_start_time > max_episode_seconds:
+#                 pbar.write(f"⏰ Episode {episode} 超时（>{max_episode_seconds}s），强制终止本 episode")
+#                 break
+
+#             actions = [ag.act(o) for ag, o in zip(agents, obs)]
+#             obs, reward, terminated, truncated, info = env.step(actions)
+
+#             # 到达目标判定
+#             agent_pos = tuple(obs[target_idx]['global_xy'])
+#             done = (agent_pos == goal)
+#             terminated[target_idx] = done
+
+#             if done:
+#                 success_flag = True
+#                 scalars['Success'] = 1
+#                 scalars['Moving Cost'] = moving_cost(timestep + 1, opt_path[0], opt_path[-1])
+#                 scalars['Detour Percentage'] = detour_percentage(timestep + 1, len(opt_path) - 1)
+#                 break
+
+#             # 采样&学习
+#             # —— 你的状态提取逻辑（尽量使用 obs[target_idx]，不要用旧 state 里的 'obs'）——
+#             # 这里保留你的原实现，注意 state 的更新放在最后
+#             agent.store(
+#                 state,
+#                 actions[target_idx],
+#                 reward[target_idx],
+#                 obs[target_idx],
+#                 terminated[target_idx],
+#             )
+#             state = obs[target_idx]
+#             scalars['Reward'] += float(reward[target_idx])
+
+#             if len(agent.replay_buffer) >= batch_size:
+#                 retrain_count += 1
+#                 scalars['Average Loss'] += float(agent.retrain(batch_size))
+#                 scalars['Average Epsilon'] += float(agent.epsilon)
+
+#         # 4) 统计本集
+#         if retrain_count > 0:
+#             scalars['Average Loss'] /= retrain_count
+#             scalars['Average Epsilon'] /= retrain_count
+
+#         if success_flag:
+#             success_count_total += 1
+#             stage_success_count += 1
+#         scalars['Success'] = 1 if success_flag else 0
+
+#         stage_episode_count += 1
+#         episode += 1
+#         pbar.update(1)
+
+#         # logging
+#         for name, value in scalars.items():
+#             writer.add_scalar(name, value, episode)
+
+#         pbar.set_postfix(
+#             Stage=(scheduler.current_stage if scheduler else "-"),
+#             SR_total=f"{success_count_total / max(1, episode):.2f}",
+#             R=f"{scalars['Reward']:.2f}",
+#         )
+
+#         # 5) 把结果写进 scheduler 的滑窗，并判定晋级/重复
+#         if scheduler is not None:
+#             scheduler.add_episode_result(scalars['Success'])
+#             window_sr = scheduler.current_window_sr()
+
+#             # 到达阶段上限：根据阶段成功率（而非滑窗）做一次硬判定
+#             if stage_episode_count >= scheduler.episodes_per_stage:
+#                 stage_sr = stage_success_count / max(1, stage_episode_count)
+#                 if stage_sr >= stage_threshold:
+#                     scheduler.advance(pbar)
+#                     # 重置阶段计数器
+#                     stage_success_count = 0
+#                     stage_episode_count = 0
+#                     # 最后一阶段且已达标可早停
+#                     if scheduler.is_done():
+#                         break
+#                     # 进入下一循环会按新阶段配置重建 env
+#                     continue
+#                 else:
+#                     # 未达标：重复当前 stage
+#                     scheduler.repeat_stage(pbar)
+#                     stage_success_count = 0
+#                     stage_episode_count = 0
+#                     # 继续在当前 stage 训练
+#                     continue
+
+#             # 可选：如果你更偏好“滑窗达标立刻晋级”，也保留这条快速通道
+#             if scheduler.ready_to_advance():
+#                 scheduler.advance(pbar)
+#                 stage_success_count = 0
+#                 stage_episode_count = 0
+#                 if scheduler.is_done():
+#                     break
+#                 continue
+
+#     # 结束：记录最终成功率（用滑窗或全局）
+#     # ✅ 只用全局：所有 episode 成功数 / 所有 episode 数
+#     final_sr = success_count_total / max(1, episode)
+#     agent.final_success_rate = float(final_sr)
+
+# # （可选）调试一下，确认口径
+#     print(f"[train] final_sr(global) = {success_count_total}/{episode} = {agent.final_success_rate:.6f}")
+
+
+#     writer.close()
+#     return agent
 
 
     
