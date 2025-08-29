@@ -451,268 +451,7 @@ def _idle_action_index(env, default_idx=0) -> int:
                 return i
     return default_idx
 
-# def train(
-#     model: torch.nn.Module,
-#     map_settings: Dict[str, dict],
-#     map_probs: Union[List[float], None],
-#     num_episodes: int = 300,
-#     batch_size: int = 32,
-#     decay_range: int = 1000,
-#     log_dir='logs',
-#     lr: float = 0.001,
-#     replay_buffer_size: int = 1000,
-#     device: str = 'cuda',
-#     scheduler: Optional[ComplexityScheduler] = None,
-#     max_episode_seconds: int = 30,
-#     run_dir: Optional[str] = None
-# ) -> DDQNAgent:
 
-#     # 输出目录
-#     run_dir = Path(log_dir) / get_timestamp() if run_dir is None else Path(run_dir)
-#     run_dir.mkdir(parents=True, exist_ok=True)
-#     writer = SummaryWriter(log_dir=str(run_dir))
-
-#     # 初始化第一个 env 以获取动作空间
-#     first_name = next(iter(map_settings))
-#     first_env = build_env_from_raw(map_settings[first_name])
-#     try:
-#         first_env.reset()
-#     except Exception:
-#         pass
-
-#     asp = _safe_get_action_space(first_env)
-#     n_actions = int(getattr(asp, "n", 5))
-#     action_space_list = list(range(n_actions))
-#     print(f"✅ n_actions = {n_actions}")
-
-#     # 探针观测 & 预热 LazyConv3d
-#     try:
-#         obs0, _ = first_env.reset()
-#     except Exception:
-#         obs0 = first_env.reset()
-#     state0 = obs0[0] if isinstance(obs0, (list, tuple)) else obs0
-#     in_channels = 11  # 你的输入通道数（常见 11）
-#     with torch.no_grad():
-#         _ = model(_obs_to_tensor_CDHW(state0, device, expected_c=in_channels))
-#     print(f"🔥 warmed model with in_channels={in_channels}")
-
-#     # 单样本预处理（存经验/拼 batch 用）：[C,D,H,W]
-#     def preprocess_single(s):
-#         return _obs_to_tensor_CDHW(s, device, expected_c=in_channels).squeeze(0)
-
-#     # 初始化 Agent（兼容两种构造签名）
-#     try:
-#         agent = DDQNAgent(
-#             model,                # q_network
-#             model,                # model
-#             action_space_list,
-#             lr=lr,
-#             decay_range=decay_range,
-#             device=device,
-#             replay_buffer_size=replay_buffer_size,
-#             obs_preprocessor=preprocess_single,
-#         )
-#     except TypeError:
-#         agent = DDQNAgent(
-#             model,
-#             action_space_list,
-#             lr=lr,
-#             decay_range=decay_range,
-#             device=device,
-#             replay_buffer_size=replay_buffer_size,
-#             obs_preprocessor=preprocess_single,
-#         )
-
-#     training_logs = []
-#     pbar = tqdm(range(num_episodes), desc='Episodes', dynamic_ncols=True)
-
-#     episode = 0
-#     success_count_total = 0
-
-#     while (scheduler is None) or (not scheduler.is_done()):
-#     # 不再用全局集数硬上限；由 scheduler 的 min_episodes_per_stage + threshold 控制推进
-#         pass  # 这行只是占位，下面的原有逻辑继续
-
-
-#         # 1) 当前阶段地图
-#         cur_map_cfg = scheduler.get_updated_map_settings() if scheduler else map_settings
-#         map_type, cfg = next(iter(cur_map_cfg.items()))
-#         env = build_env_from_raw(cfg)
-
-#         stage_id = (scheduler.current_stage if scheduler else -1)
-#         cpx_val = cfg.get("complexity", None)
-#         if cpx_val is not None and np.isfinite(cpx_val):
-#             pbar.write(f"🟢 地图：{map_type} | Stage {stage_id} | Agents={env.num_agents} | Complexity={float(cpx_val):.3f}")
-#         else:
-#             pbar.write(f"🟢 地图：{map_type} | Stage {stage_id} | Agents={env.num_agents}")
-
-#         # 2) reset
-#         try:
-#             obs, info = env.reset()
-#         except Exception:
-#             obs = env.reset()
-#             info = {}
-
-#         # 目标代理（其它用 A* 做队友）
-#         target_idx = np.random.randint(env.num_agents)
-#         teammates = [AStarAgent() if i != target_idx else None for i in range(env.num_agents)]
-#         goal = tuple(env.goals[target_idx])
-#         state = obs[target_idx]
-
-#         # 估计最短路长度（或用曼哈顿作兜底）→ 动态步数预算
-#         try:
-#             opt_len = max(1, len(env.global_guidance[target_idx]) + 1)
-#         except Exception:
-#             try:
-#                 sx, sy = state['global_xy']; gx, gy = goal
-#                 opt_len = max(1, abs(sx - gx) + abs(sy - gy) + 1)
-#             except Exception:
-#                 opt_len = 60
-#         timesteps_per_episode = min(400, max(60, int(opt_len * 6)))
-
-#         # 3) 一集
-#         success_flag = False
-#         retrain_count = 0
-#         episode_start_time = time.time()
-
-#         # 防卡死
-#         last_pos = tuple(state['global_xy'])
-#         no_move_steps = 0
-
-#         for t in range(timesteps_per_episode):
-#             if time.time() - episode_start_time > max_episode_seconds:
-#                 pbar.write(f"⏰ Episode {episode} 超时（>{max_episode_seconds}s）")
-#                 break
-
-#             # ===== 我方（NN） + 队友（A*） 选动作 =====
-#             # actions = []
-#             # for i in range(env.num_agents):
-#                 # if i == target_idx:
-#                 #     x = _obs_to_tensor_CDHW(obs[i], device, expected_c=in_channels)  # [1,C,D,H,W]
-#                 #     if x.shape[1] != in_channels:
-#                 #         raise RuntimeError(f"[PrepMismatch] x.shape={tuple(x.shape)}, expected C={in_channels}")
-#                 #     with torch.no_grad():
-#                 #         q = agent.q_network(x)
-#                 #         a = int(torch.argmax(q, dim=1).item())
-#                 #     actions.append(a)
-
-#                 # 确认 idle 动作编号（只做一次，放在 env 创建后即可；若你已有，可跳过）
-#             IDLE_ACTION_INDEX = 0
-#             if hasattr(env, "actions") and isinstance(env.actions, (list, tuple)):
-#                 for idx, name in enumerate(env.actions):
-#                     if isinstance(name, str) and name.lower() in ("idle", "stay", "noop", "wait"):
-#                         IDLE_ACTION_INDEX = idx
-#                         break
-
-# # ……for t in range(timesteps_per_episode) 内……
-#             actions = []
-#             for i in range(env.num_agents):
-#                 if i == target_idx:
-#                     x = _obs_to_tensor_CDHW(obs[i], device, expected_c=in_channels)  # [1,C,D,H,W]
-#                     if x.shape[1] != in_channels:
-#                         raise RuntimeError(f"[PrepMismatch] x.shape={tuple(x.shape)}, expected C={in_channels}")
-
-#         # ε-greedy：用 agent.epsilon（如果类里没有，会走到下面“手动衰减”那段去维护）
-#                     eps = float(getattr(agent, "epsilon", 1.0))
-#                     if random.random() < eps:
-#                         a = random.randrange(n_actions)
-#                     else:
-#                         with torch.no_grad():
-#                             q = agent.q_network(x)
-#                             a = int(torch.argmax(q, dim=1))
-#                     actions.append(a)
-#                 else:
-#         # 队友 A* 保持原逻辑
-#                     try:
-#                         actions.append(int(teammates[i].act(obs[i])))
-#                     except Exception:
-#                         actions.append(IDLE_ACTION_INDEX)
-
-#                     else:
-#                             try:
-#                                 actions.append(int(teammates[i].act(obs[i])))
-#                             except Exception:
-#                                  actions.append(0)
-
-#             obs, reward, terminated, truncated, info = env.step(actions)
-
-#             # 成功判定
-#             agent_pos = tuple(obs[target_idx]['global_xy'])
-#             done = (agent_pos == goal)
-#             terminated[target_idx] = done
-#             if done:
-#                 success_flag = True
-#                 break
-
-#             # 防卡死：若目标 agent 一直没移动，提前终止
-#             if agent_pos == last_pos:
-#                 no_move_steps += 1
-#                 if no_move_steps >= STUCK_PATIENCE:
-#                     pbar.write(f"🧊 Episode {episode} 提前终止（{STUCK_PATIENCE} 步未移动）")
-#                     break
-#             else:
-#                 no_move_steps = 0
-#                 last_pos = agent_pos
-
-#             # 经验 & 学习
-#             agent.store(
-#                 state,
-#                 actions[target_idx],
-#                 reward[target_idx],
-#                 obs[target_idx],
-#                 terminated[target_idx],
-#             )
-#             state = obs[target_idx]
-
-#             if len(agent.replay_buffer) >= batch_size:
-#                 retrain_count += 1
-#                 _ = agent.retrain(batch_size)
-
-#         # 4) 统计与日志
-#         if success_flag:
-#             success_count_total += 1
-
-#         episode += 1
-#         success_rate = success_count_total / max(1, episode)
-#         writer.add_scalar('Success/episode', int(success_flag), episode)
-#         writer.add_scalar('SuccessRate/global', success_rate, episode)
-
-#         pbar.set_postfix(
-#             Stage=(stage_id if scheduler else "-"),
-#             success=int(success_flag),
-#             SR=f"{success_rate:.3f}",
-#         )
-#         pbar.update(1)
-
-#         training_logs.append({
-#             "episode": episode,
-#             "stage": stage_id,
-#             "map": map_type,
-#             "agents": getattr(env, "num_agents", None),
-#             "complexity": (float(cpx_val) if cpx_val is not None else np.nan),
-#             "success": int(success_flag),
-#             "success_rate": float(success_rate),
-#         })
-
-#         # 5) 课程逻辑
-#         if scheduler is not None:
-#             scheduler.add_episode_result(int(success_flag))
-#             if scheduler.should_advance():
-#                 scheduler.advance(pbar)
-#                 if scheduler.is_done():
-#                     break
-#             else:
-#                 if scheduler._ep_in_stage >= scheduler.min_episodes_per_stage:
-#                     scheduler.repeat_stage(pbar)
-
-#     # 保存日志
-#     df = pd.DataFrame(training_logs)
-#     csv_path = run_dir / "episodes.csv"
-#     df.to_csv(csv_path, index=False, encoding="utf-8-sig")
-#     print(f"📝 每集日志已保存：{csv_path}")
-
-#     writer.close()
-#     return agent
 def train(
     model: torch.nn.Module,
     map_settings: Dict[str, dict],
@@ -798,16 +537,27 @@ def train(
 
     # —— 日志与统计（与原逻辑对齐）
     training_logs = []
-    pbar = tqdm(range(num_episodes), desc='Episodes', dynamic_ncols=True)
+    # —— 日志与统计
+    if scheduler is not None:
+        total_eps = (scheduler.max_stage + 1) * scheduler.min_episodes_per_stage
+        pbar = tqdm(total=total_eps, desc='Episodes', dynamic_ncols=True)
+    else:
+        pbar = tqdm(total=num_episodes, desc='Episodes', dynamic_ncols=True)
 
     episode = 0
     success_count_total = 0
     stage_success_count = 0
     stage_episode_count = 0
 
-    while (scheduler is None) or (scheduler.current_stage <= scheduler.max_stage):
-        if episode >= num_episodes:
-            break
+    while True:
+    # 仅当没有 scheduler 时才用 num_episodes 卡死；有 scheduler 则以“全阶段完成”为止
+        if scheduler is None:
+            if episode >= num_episodes:
+                break
+        else:
+            if scheduler.is_done():
+                break
+
 
         # 1) 当前阶段地图 & 构建 env
         cur_map_cfg = scheduler.get_updated_map_settings() if scheduler else map_settings
@@ -940,7 +690,7 @@ def train(
             success=int(success_flag),
             success_rate=f"{success_rate:.3f}",
         )
-        pbar.update(0)  # 与你给的版本保持一致
+        pbar.update(1)  # 与你给的版本保持一致
 
         training_logs.append({
             "episode": episode,
@@ -1010,7 +760,7 @@ if __name__ == "__main__":
         scheduler=scheduler,
         map_settings=scheduler.get_updated_map_settings(),  # 初次取一张；train 内每集会再取
         map_probs=None,
-        num_episodes=NUM_EPISODES,
+        # num_episodes=NUM_EPISODES,
         batch_size=BATCH_SIZE,
         replay_buffer_size=REPLAY_BUFFER_SIZE,
         decay_range=DECAY_RANGE,
