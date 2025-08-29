@@ -17,11 +17,17 @@ from tqdm import tqdm
 from pogema import AStarAgent
 
 # ===================== 配置区（按需修改） =====================
+# 1) YAML 地图配置
 MAP_SETTINGS_PATH = r"C:/Users/MSc_SEIoT_1/MAPF_G2RL-main - train/g2rl/map_settings_generated_new.yaml"
-COMPLEXITY_CSV    = r"C:/Users/MSc_SEIoT_1/MAPF_G2RL-main-nn/0827result/maps_features_with_complexity.csv"
-MAP_ID_COL_IN_CSV  = "config_id"
-MAP_ID_COL_IN_YAML = "name"
 
+# 2) 复杂度 CSV（由 infer_complexity.py 生成）
+COMPLEXITY_CSV = r"C:/Users/MSc_SEIoT_1/MAPF_G2RL-main-nn/0827result/maps_features_with_complexity.csv"
+
+# 3) 复杂度CSV里用于匹配地图ID的列（csv）与 YAML 的对应字段（yaml）
+MAP_ID_COL_IN_CSV  = "config_id"   # 也可换成 "grid_hash"
+MAP_ID_COL_IN_YAML = "name"        # YAML 里地图的唯一标识字段
+
+# 4) 训练超参
 N_STAGES = 5
 MIN_PER_STAGE = 10
 MIN_EPISODES_PER_STAGE = 300
@@ -33,31 +39,24 @@ REPLAY_BUFFER_SIZE = 500
 DECAY_RANGE = 10_000
 MAX_EPISODE_SECONDS = 30
 LOG_DIR = "logs"
-RUN_DIR = r"C:/Users/MSc_SEIoT_1/MAPF_G2RL-main/train0829/final_trainig_1"
+RUN_DIR = r"C:/Users/MSc_SEIoT_1/MAPF_G2RL-main-nn/final_trainig_0829"
 MODEL_OUT = "models/best_model.pt"
 
-# 反卡死与探索
-STUCK_PATIENCE = 20                 # 连续未移动步数阈值（到这会提前终止）
-UNSTUCK_RANDOM_AFTER = STUCK_PATIENCE // 2  # 达到这个值先强制随机动作几步
-UNSTUCK_RANDOM_STEPS = 3
-
-# 稠密奖励（距离 shaping）
-USE_DENSE_SHAPING = True
-SHAPING_SCALE = 0.01                # 曼哈顿距离减少 * 该系数
-
-# 可选：网络动作 -> 环境动作索引映射（不清楚时用 None = 恒等映射）
-ACTION_MAP: Optional[List[int]] = None
+# 防卡死：目标智能体连续多少步不动就提前终止该集
+STUCK_PATIENCE = 20
 # ============================================================
 
+# ============ 项目根路径（确保能 import g2rl.*） ============
 project_root = r"C:/Users/MSc_SEIoT_1/MAPF_G2RL-main-nn"
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
+# ============ 项目模块 ============
 from g2rl.environment import G2RLEnv
 from g2rl.agent import DDQNAgent
 from g2rl.network import CRNNModel
 
-# ---------------- 提取观测数组 ----------------
+# ---------------- 工具：从观测中提取数组 ----------------
 def _find_array(obj):
     import numpy as np
     try:
@@ -83,8 +82,8 @@ def _find_array(obj):
         preferred = ("view_cache","obs","observation","state","tensor","grid","image","local_obs","global_obs")
         for k in preferred:
             if k in obj:
-                arr = _find_array(obj[k]); 
-                if arr is not None: 
+                arr = _find_array(obj[k])
+                if arr is not None:
                     return arr
         for v in obj.values():
             arr = _find_array(v)
@@ -99,14 +98,16 @@ def _find_array(obj):
         pass
     return None
 
-# ---------------- 统一到 [1,C,D,H,W] ----------------
+# -------- 观测统一到 [1, C, D, H, W]，并对齐通道数 --------
 def _obs_to_tensor_CDHW(s, device, expected_c: int):
-    import numpy as np, torch
+    import numpy as np
+    import torch
     arr = _find_array(s)
     if arr is None:
         raise ValueError("无法从观测中提取数组/张量。")
     arr = np.array(arr)
 
+    # 归一到 [C, D, H, W]
     if arr.ndim == 5:  # [N,*,*,*,*]
         if arr.shape[1] == expected_c:
             arr = arr[0]
@@ -114,20 +115,21 @@ def _obs_to_tensor_CDHW(s, device, expected_c: int):
             arr = np.transpose(arr, (0,4,1,2,3))[0]  # NDHWC -> CDHW
         else:
             arr = arr[0]
-    elif arr.ndim == 4:  # [C,D,H,W] / [D,H,W,C] / [D,C,H,W]
+    elif arr.ndim == 4:  # [C,D,H,W] 或 [D,H,W,C] 或 [D,C,H,W]
         if arr.shape[0] == expected_c:
             pass
         elif arr.shape[-1] == expected_c:
-            arr = np.transpose(arr, (3,0,1,2))  # DHWC -> CDHW
+            arr = np.transpose(arr, (3,0,1,2))       # DHWC -> CDHW
         elif arr.shape[1] == expected_c:
-            arr = np.transpose(arr, (1,0,2,3))  # DCHW -> CDHW
-    elif arr.ndim == 3:
+            arr = np.transpose(arr, (1,0,2,3))       # DCHW -> CDHW
+    elif arr.ndim == 3:  # [D,H,W]
         arr = arr[None, ...]
-    elif arr.ndim == 2:
+    elif arr.ndim == 2:  # [H,W]
         arr = arr[None, None, ...]
     else:
         raise ValueError(f"观测维度不支持：shape={arr.shape}, ndim={arr.ndim}")
 
+    # 对齐通道数
     C, D, H, W = arr.shape
     if C == expected_c:
         arr_fixed = arr
@@ -141,7 +143,7 @@ def _obs_to_tensor_CDHW(s, device, expected_c: int):
 
     return torch.tensor(arr_fixed[None, ...], dtype=torch.float32, device=device)  # [1,C,D,H,W]
 
-# ---------------- 动作空间 ----------------
+# -------- 稳健拿动作空间 --------
 def _safe_get_action_space(env):
     asp = getattr(env, "action_space", None)
     if asp is not None and hasattr(asp, "n"):
@@ -160,6 +162,7 @@ def _safe_get_action_space(env):
             return SimpleNamespace(n=len(env.actions))
         except Exception:
             pass
+    # 重置再试一轮
     try:
         env.reset()
     except Exception:
@@ -183,7 +186,7 @@ def _safe_get_action_space(env):
             pass
     return SimpleNamespace(n=5)
 
-# ---------------- 构造 env ----------------
+# -------- 安全构造 env（只传 __init__ 支持的参数） --------
 def build_env_from_raw(raw_cfg: dict) -> G2RLEnv:
     sig = inspect.signature(G2RLEnv.__init__)
     allowed = {
@@ -191,9 +194,11 @@ def build_env_from_raw(raw_cfg: dict) -> G2RLEnv:
         if p.kind in (inspect.Parameter.POSITIONAL_OR_KEYWORD, inspect.Parameter.KEYWORD_ONLY)
     }
     allowed.discard("self")
+
     ctor_cfg = {k: v for k, v in raw_cfg.items() if k in allowed}
     env = G2RLEnv(**ctor_cfg)
 
+    # 将 grid/starts/goals 等作为属性挂载（如果 YAML 有这些）
     if "grid" in raw_cfg:
         try:
             env.grid = (np.array(raw_cfg["grid"]) > 0).astype(np.uint8)
@@ -203,19 +208,26 @@ def build_env_from_raw(raw_cfg: dict) -> G2RLEnv:
         env.starts = raw_cfg["starts"]
     if "goals" in raw_cfg:
         env.goals = raw_cfg["goals"]
+
     return env
 
-# ---------------- 合并复杂度 ----------------
+# ================== 用 CSV 合并复杂度 ==================
 def _merge_complexity_from_csv(base_map_settings: Dict[str, dict]) -> Dict[str, dict]:
-    import numpy as np, pandas as pd, os
+    import numpy as np
+    import pandas as pd
+    import os
+
     if not os.path.exists(COMPLEXITY_CSV):
         raise FileNotFoundError(f"未找到复杂度CSV：{COMPLEXITY_CSV}")
+
     df = pd.read_csv(COMPLEXITY_CSV)
+
     if "nn_complexity" not in df.columns:
         if "nn_pred_success_rate" in df.columns:
             df["nn_complexity"] = 1.0 - pd.to_numeric(df["nn_pred_success_rate"], errors="coerce")
         else:
             raise ValueError("复杂度CSV缺少 nn_complexity 且没有 nn_pred_success_rate 无法推导。")
+
     df["nn_complexity"] = pd.to_numeric(df["nn_complexity"], errors="coerce")
 
     csv_id_candidates  = [c for c in ["config_id", "grid_hash", "name", "map_id"] if c in df.columns]
@@ -223,35 +235,44 @@ def _merge_complexity_from_csv(base_map_settings: Dict[str, dict]) -> Dict[str, 
     for spec in base_map_settings.values():
         yaml_id_candidates.update(spec.keys())
     yaml_id_candidates = [c for c in ["config_id", "grid_hash", "name", "map_id"] if c in yaml_id_candidates]
+
     common_ids = [c for c in csv_id_candidates if c in yaml_id_candidates]
     chosen_id = common_ids[0] if common_ids else None
     use_composite = (chosen_id is None)
 
     if not use_composite:
-        agg = (df.groupby(chosen_id, dropna=False)["nn_complexity"]
-               .mean().reset_index().rename(columns={"nn_complexity": "complexity"}))
+        agg = (
+            df.groupby(chosen_id, dropna=False)["nn_complexity"]
+              .mean().reset_index().rename(columns={"nn_complexity": "complexity"})
+        )
         comp_map = dict(zip(agg[chosen_id].astype(str), agg["complexity"].astype(float)))
     else:
         needed = ["size", "num_agents", "density", "obs_radius", "max_episode_steps"]
         missing = [c for c in needed if c not in df.columns]
         if missing:
             raise ValueError(f"无法用复合键匹配，CSV 缺少列：{missing}")
+
         df["_size"] = pd.to_numeric(df["size"], errors="coerce").astype("Int64")
         df["_nag"]  = pd.to_numeric(df["num_agents"], errors="coerce").astype("Int64")
         df["_den"]  = pd.to_numeric(df["density"], errors="coerce").round(4)
         df["_obs"]  = pd.to_numeric(df["obs_radius"], errors="coerce").astype("Int64")
         df["_mep"]  = pd.to_numeric(df["max_episode_steps"], errors="coerce").astype("Int64")
-        comp = (df.dropna(subset=["_size","_nag","_den","_obs","_mep"])
-                  .groupby(["_size","_nag","_den","_obs","_mep"])["nn_complexity"]
-                  .mean().reset_index().rename(columns={"nn_complexity":"complexity"}))
-        comp_map = { (int(r["_size"]), int(r["_nag"]), float(r["_den"]), int(r["_obs"]), int(r["_mep"])): float(r["complexity"])
-                    for _, r in comp.iterrows() }
 
-    out, matched, unmatched = {}, 0, 0
-    import numpy as np
+        comp = (
+            df.dropna(subset=["_size","_nag","_den","_obs","_mep"])
+              .groupby(["_size","_nag","_den","_obs","_mep"])["nn_complexity"]
+              .mean().reset_index().rename(columns={"nn_complexity":"complexity"})
+        )
+        comp_map = { (int(r["_size"]), int(r["_nag"]), float(r["_den"]), int(r["_obs"]), int(r["_mep"])): float(r["complexity"])
+                     for _, r in comp.iterrows() }
+
+    matched, unmatched = 0, 0
+    out: Dict[str, dict] = {}
+
     for name, spec in base_map_settings.items():
         new_spec = dict(spec)
         cpx_val = np.nan
+
         if not use_composite:
             key = spec.get(chosen_id, None)
             if key is None and chosen_id == "name":
@@ -260,20 +281,23 @@ def _merge_complexity_from_csv(base_map_settings: Dict[str, dict]) -> Dict[str, 
                 cpx_val = comp_map.get(str(key), np.nan)
         else:
             try:
-                tup = (int(spec.get("size")),
-                       int(spec.get("num_agents")),
-                       round(float(spec.get("density")),4),
-                       int(spec.get("obs_radius")),
-                       int(spec.get("max_episode_steps")))
+                size  = int(spec.get("size"))
+                nag   = int(spec.get("num_agents"))
+                den   = float(spec.get("density"))
+                obs   = int(spec.get("obs_radius"))
+                mep   = int(spec.get("max_episode_steps"))
+                tup   = (size, nag, round(den,4), obs, mep)
                 cpx_val = comp_map.get(tup, np.nan)
             except Exception:
                 cpx_val = np.nan
+
         if np.isfinite(cpx_val):
             matched += 1
             new_spec["complexity"] = float(cpx_val)
         else:
             unmatched += 1
             new_spec["complexity"] = np.nan
+
         out[name] = new_spec
 
     print(f"🧩 复杂度匹配统计：matched={matched}, unmatched={unmatched} | 模式={'复合键' if use_composite else f'ID列({chosen_id})'}")
@@ -282,6 +306,7 @@ def _merge_complexity_from_csv(base_map_settings: Dict[str, dict]) -> Dict[str, 
         print(f"⚠️ 有 {unmatched} 张地图未匹配到复杂度（未参与量化）。示例：{examples}")
     return out
 
+# ================== 阶段切分（按复杂度分位） ==================
 def _build_stages_by_quantile_df(df: pd.DataFrame, n_stages: int = 5, min_per_stage: int = 5):
     df = df.dropna(subset=["complexity"]).copy()
     if len(df) == 0:
@@ -305,7 +330,13 @@ def _build_stages_by_quantile_df(df: pd.DataFrame, n_stages: int = 5, min_per_st
         })
     return stages
 
+# ================== Scheduler ==================
 class ComplexityScheduler:
+    """
+    - 每阶段持有一组 maps（由 complexity 分位切分）
+    - 每阶段至少跑 min_episodes_per_stage 集
+    - 达到阈值后晋级
+    """
     def __init__(self,
                  base_map_settings: Dict[str, dict],
                  n_stages: int = 5,
@@ -321,13 +352,15 @@ class ComplexityScheduler:
         self.window_size = int(window_size)
         self.use_window_sr = bool(use_window_sr)
 
-        rows = [{"name": n, "complexity": s.get("complexity", np.nan), "spec": s}
-                for n, s in base_map_settings.items()]
+        rows = []
+        for name, spec in base_map_settings.items():
+            rows.append({"name": name, "complexity": spec.get("complexity", np.nan), "spec": spec})
         df = pd.DataFrame(rows)
         stages = _build_stages_by_quantile_df(df, n_stages=n_stages, min_per_stage=min_per_stage)
 
         self._rng = random.Random(seed)
-        self._stage_items, self._stage_edges = [], []
+        self._stage_items = []
+        self._stage_edges = []
         for st in stages:
             items = list(st["items"])
             if shuffle_each_stage:
@@ -337,6 +370,7 @@ class ComplexityScheduler:
 
         self.current_stage = 0
         self.max_stage = len(self._stage_items) - 1
+
         self._idx_in_stage = 0
         self._win = deque(maxlen=self.window_size)
         self._ep_in_stage = 0
@@ -348,16 +382,6 @@ class ComplexityScheduler:
         items = self._stage_items[self.current_stage]
         if not items:
             raise RuntimeError(f"Stage {self.current_stage} 没有地图。")
-        # Stage-0 优先少量 agent 的图，减拥堵
-        if self.current_stage == 0:
-            for k in range(len(items)):
-                idx = (self._idx_in_stage + k) % len(items)
-                cand = items[idx]
-                spec = cand["spec"]
-                if int(spec.get("num_agents", 16)) <= 4:
-                    self._idx_in_stage = (idx + 1) % len(items)
-                    return {cand["name"]: spec}
-        # 正常轮转
         item = items[self._idx_in_stage]
         self._idx_in_stage = (self._idx_in_stage + 1) % len(items)
         return {item["name"]: item["spec"]}
@@ -405,9 +429,290 @@ class ComplexityScheduler:
     def is_done(self) -> bool:
         return self.current_stage > self.max_stage
 
+# ================== 训练 ==================
 def get_timestamp() -> str:
     return datetime.now().strftime('%H-%M-%d-%m-%Y')
 
+
+
+# ====== 放在 train() 之前：两个小工具 ======
+def _pogema_num_agents_from_obs(obs) -> int:
+    """用观测长度做准：避免封装/包装导致的 num_agents 不一致。"""
+    try:
+        return int(len(obs))
+    except Exception:
+        return 1
+
+def _idle_action_index(env, default_idx=0) -> int:
+    """从 env.actions 中找 idle/stay/noop/wait；找不到就用 default_idx。"""
+    if hasattr(env, "actions") and isinstance(env.actions, (list, tuple)):
+        for i, name in enumerate(env.actions):
+            if isinstance(name, str) and name.lower() in ("idle", "stay", "noop", "wait"):
+                return i
+    return default_idx
+
+# def train(
+#     model: torch.nn.Module,
+#     map_settings: Dict[str, dict],
+#     map_probs: Union[List[float], None],
+#     num_episodes: int = 300,
+#     batch_size: int = 32,
+#     decay_range: int = 1000,
+#     log_dir='logs',
+#     lr: float = 0.001,
+#     replay_buffer_size: int = 1000,
+#     device: str = 'cuda',
+#     scheduler: Optional[ComplexityScheduler] = None,
+#     max_episode_seconds: int = 30,
+#     run_dir: Optional[str] = None
+# ) -> DDQNAgent:
+
+#     # 输出目录
+#     run_dir = Path(log_dir) / get_timestamp() if run_dir is None else Path(run_dir)
+#     run_dir.mkdir(parents=True, exist_ok=True)
+#     writer = SummaryWriter(log_dir=str(run_dir))
+
+#     # 初始化第一个 env 以获取动作空间
+#     first_name = next(iter(map_settings))
+#     first_env = build_env_from_raw(map_settings[first_name])
+#     try:
+#         first_env.reset()
+#     except Exception:
+#         pass
+
+#     asp = _safe_get_action_space(first_env)
+#     n_actions = int(getattr(asp, "n", 5))
+#     action_space_list = list(range(n_actions))
+#     print(f"✅ n_actions = {n_actions}")
+
+#     # 探针观测 & 预热 LazyConv3d
+#     try:
+#         obs0, _ = first_env.reset()
+#     except Exception:
+#         obs0 = first_env.reset()
+#     state0 = obs0[0] if isinstance(obs0, (list, tuple)) else obs0
+#     in_channels = 11  # 你的输入通道数（常见 11）
+#     with torch.no_grad():
+#         _ = model(_obs_to_tensor_CDHW(state0, device, expected_c=in_channels))
+#     print(f"🔥 warmed model with in_channels={in_channels}")
+
+#     # 单样本预处理（存经验/拼 batch 用）：[C,D,H,W]
+#     def preprocess_single(s):
+#         return _obs_to_tensor_CDHW(s, device, expected_c=in_channels).squeeze(0)
+
+#     # 初始化 Agent（兼容两种构造签名）
+#     try:
+#         agent = DDQNAgent(
+#             model,                # q_network
+#             model,                # model
+#             action_space_list,
+#             lr=lr,
+#             decay_range=decay_range,
+#             device=device,
+#             replay_buffer_size=replay_buffer_size,
+#             obs_preprocessor=preprocess_single,
+#         )
+#     except TypeError:
+#         agent = DDQNAgent(
+#             model,
+#             action_space_list,
+#             lr=lr,
+#             decay_range=decay_range,
+#             device=device,
+#             replay_buffer_size=replay_buffer_size,
+#             obs_preprocessor=preprocess_single,
+#         )
+
+#     training_logs = []
+#     pbar = tqdm(range(num_episodes), desc='Episodes', dynamic_ncols=True)
+
+#     episode = 0
+#     success_count_total = 0
+
+#     while (scheduler is None) or (not scheduler.is_done()):
+#     # 不再用全局集数硬上限；由 scheduler 的 min_episodes_per_stage + threshold 控制推进
+#         pass  # 这行只是占位，下面的原有逻辑继续
+
+
+#         # 1) 当前阶段地图
+#         cur_map_cfg = scheduler.get_updated_map_settings() if scheduler else map_settings
+#         map_type, cfg = next(iter(cur_map_cfg.items()))
+#         env = build_env_from_raw(cfg)
+
+#         stage_id = (scheduler.current_stage if scheduler else -1)
+#         cpx_val = cfg.get("complexity", None)
+#         if cpx_val is not None and np.isfinite(cpx_val):
+#             pbar.write(f"🟢 地图：{map_type} | Stage {stage_id} | Agents={env.num_agents} | Complexity={float(cpx_val):.3f}")
+#         else:
+#             pbar.write(f"🟢 地图：{map_type} | Stage {stage_id} | Agents={env.num_agents}")
+
+#         # 2) reset
+#         try:
+#             obs, info = env.reset()
+#         except Exception:
+#             obs = env.reset()
+#             info = {}
+
+#         # 目标代理（其它用 A* 做队友）
+#         target_idx = np.random.randint(env.num_agents)
+#         teammates = [AStarAgent() if i != target_idx else None for i in range(env.num_agents)]
+#         goal = tuple(env.goals[target_idx])
+#         state = obs[target_idx]
+
+#         # 估计最短路长度（或用曼哈顿作兜底）→ 动态步数预算
+#         try:
+#             opt_len = max(1, len(env.global_guidance[target_idx]) + 1)
+#         except Exception:
+#             try:
+#                 sx, sy = state['global_xy']; gx, gy = goal
+#                 opt_len = max(1, abs(sx - gx) + abs(sy - gy) + 1)
+#             except Exception:
+#                 opt_len = 60
+#         timesteps_per_episode = min(400, max(60, int(opt_len * 6)))
+
+#         # 3) 一集
+#         success_flag = False
+#         retrain_count = 0
+#         episode_start_time = time.time()
+
+#         # 防卡死
+#         last_pos = tuple(state['global_xy'])
+#         no_move_steps = 0
+
+#         for t in range(timesteps_per_episode):
+#             if time.time() - episode_start_time > max_episode_seconds:
+#                 pbar.write(f"⏰ Episode {episode} 超时（>{max_episode_seconds}s）")
+#                 break
+
+#             # ===== 我方（NN） + 队友（A*） 选动作 =====
+#             # actions = []
+#             # for i in range(env.num_agents):
+#                 # if i == target_idx:
+#                 #     x = _obs_to_tensor_CDHW(obs[i], device, expected_c=in_channels)  # [1,C,D,H,W]
+#                 #     if x.shape[1] != in_channels:
+#                 #         raise RuntimeError(f"[PrepMismatch] x.shape={tuple(x.shape)}, expected C={in_channels}")
+#                 #     with torch.no_grad():
+#                 #         q = agent.q_network(x)
+#                 #         a = int(torch.argmax(q, dim=1).item())
+#                 #     actions.append(a)
+
+#                 # 确认 idle 动作编号（只做一次，放在 env 创建后即可；若你已有，可跳过）
+#             IDLE_ACTION_INDEX = 0
+#             if hasattr(env, "actions") and isinstance(env.actions, (list, tuple)):
+#                 for idx, name in enumerate(env.actions):
+#                     if isinstance(name, str) and name.lower() in ("idle", "stay", "noop", "wait"):
+#                         IDLE_ACTION_INDEX = idx
+#                         break
+
+# # ……for t in range(timesteps_per_episode) 内……
+#             actions = []
+#             for i in range(env.num_agents):
+#                 if i == target_idx:
+#                     x = _obs_to_tensor_CDHW(obs[i], device, expected_c=in_channels)  # [1,C,D,H,W]
+#                     if x.shape[1] != in_channels:
+#                         raise RuntimeError(f"[PrepMismatch] x.shape={tuple(x.shape)}, expected C={in_channels}")
+
+#         # ε-greedy：用 agent.epsilon（如果类里没有，会走到下面“手动衰减”那段去维护）
+#                     eps = float(getattr(agent, "epsilon", 1.0))
+#                     if random.random() < eps:
+#                         a = random.randrange(n_actions)
+#                     else:
+#                         with torch.no_grad():
+#                             q = agent.q_network(x)
+#                             a = int(torch.argmax(q, dim=1))
+#                     actions.append(a)
+#                 else:
+#         # 队友 A* 保持原逻辑
+#                     try:
+#                         actions.append(int(teammates[i].act(obs[i])))
+#                     except Exception:
+#                         actions.append(IDLE_ACTION_INDEX)
+
+#                     else:
+#                             try:
+#                                 actions.append(int(teammates[i].act(obs[i])))
+#                             except Exception:
+#                                  actions.append(0)
+
+#             obs, reward, terminated, truncated, info = env.step(actions)
+
+#             # 成功判定
+#             agent_pos = tuple(obs[target_idx]['global_xy'])
+#             done = (agent_pos == goal)
+#             terminated[target_idx] = done
+#             if done:
+#                 success_flag = True
+#                 break
+
+#             # 防卡死：若目标 agent 一直没移动，提前终止
+#             if agent_pos == last_pos:
+#                 no_move_steps += 1
+#                 if no_move_steps >= STUCK_PATIENCE:
+#                     pbar.write(f"🧊 Episode {episode} 提前终止（{STUCK_PATIENCE} 步未移动）")
+#                     break
+#             else:
+#                 no_move_steps = 0
+#                 last_pos = agent_pos
+
+#             # 经验 & 学习
+#             agent.store(
+#                 state,
+#                 actions[target_idx],
+#                 reward[target_idx],
+#                 obs[target_idx],
+#                 terminated[target_idx],
+#             )
+#             state = obs[target_idx]
+
+#             if len(agent.replay_buffer) >= batch_size:
+#                 retrain_count += 1
+#                 _ = agent.retrain(batch_size)
+
+#         # 4) 统计与日志
+#         if success_flag:
+#             success_count_total += 1
+
+#         episode += 1
+#         success_rate = success_count_total / max(1, episode)
+#         writer.add_scalar('Success/episode', int(success_flag), episode)
+#         writer.add_scalar('SuccessRate/global', success_rate, episode)
+
+#         pbar.set_postfix(
+#             Stage=(stage_id if scheduler else "-"),
+#             success=int(success_flag),
+#             SR=f"{success_rate:.3f}",
+#         )
+#         pbar.update(1)
+
+#         training_logs.append({
+#             "episode": episode,
+#             "stage": stage_id,
+#             "map": map_type,
+#             "agents": getattr(env, "num_agents", None),
+#             "complexity": (float(cpx_val) if cpx_val is not None else np.nan),
+#             "success": int(success_flag),
+#             "success_rate": float(success_rate),
+#         })
+
+#         # 5) 课程逻辑
+#         if scheduler is not None:
+#             scheduler.add_episode_result(int(success_flag))
+#             if scheduler.should_advance():
+#                 scheduler.advance(pbar)
+#                 if scheduler.is_done():
+#                     break
+#             else:
+#                 if scheduler._ep_in_stage >= scheduler.min_episodes_per_stage:
+#                     scheduler.repeat_stage(pbar)
+
+#     # 保存日志
+#     df = pd.DataFrame(training_logs)
+#     csv_path = run_dir / "episodes.csv"
+#     df.to_csv(csv_path, index=False, encoding="utf-8-sig")
+#     print(f"📝 每集日志已保存：{csv_path}")
+
+#     writer.close()
+#     return agent
 def train(
     model: torch.nn.Module,
     map_settings: Dict[str, dict],
@@ -424,177 +729,186 @@ def train(
     run_dir: Optional[str] = None
 ) -> DDQNAgent:
 
-    run_dir = Path(log_dir) / get_timestamp() if run_dir is None else Path(run_dir)
+    timestamp = get_timestamp()
+    run_dir = Path(log_dir) / timestamp if run_dir is None else Path(run_dir)
     run_dir.mkdir(parents=True, exist_ok=True)
     writer = SummaryWriter(log_dir=str(run_dir))
 
-    # —— 环境与动作空间
+    # —— 初始化第一个 env & 动作空间
     first_name = next(iter(map_settings))
     first_env = build_env_from_raw(map_settings[first_name])
     try:
         first_env.reset()
     except Exception:
         pass
-    asp = _safe_get_action_space(first_env)
-    n_actions = int(getattr(asp, "n", 5))
+
+    # 动作数稳健推断
+    try:
+        asp = first_env.get_action_space()
+        if hasattr(asp, "n"):
+            n_actions = int(asp.n)
+        elif hasattr(asp, "__len__"):
+            n_actions = int(len(asp))
+        elif isinstance(asp, int):
+            n_actions = int(asp)
+        else:
+            n_actions = 5
+    except Exception:
+        n_actions = 5
     action_space_list = list(range(n_actions))
     print(f"✅ n_actions = {n_actions}")
 
-    # —— 观测通道 + 预热
+    # —— 预热模型（锁定 LazyConv3d 的输入通道）
     try:
         obs0, _ = first_env.reset()
     except Exception:
         obs0 = first_env.reset()
     state0 = obs0[0] if isinstance(obs0, (list, tuple)) else obs0
-    in_channels = 11
+    in_channels = 11  # 如需可改成你的真实通道数
     with torch.no_grad():
         _ = model(_obs_to_tensor_CDHW(state0, device, expected_c=in_channels))
     print(f"🔥 warmed model with in_channels={in_channels}")
 
-    # —— 预处理器
+    # —— 预处理器（给经验回放与 retrain 用）
     def preprocess_single(s):
         return _obs_to_tensor_CDHW(s, device, expected_c=in_channels).squeeze(0)
 
-    # —— Agent
+    # —— 构造 Agent（兼容两种 __init__ 签名）
     try:
         agent = DDQNAgent(
-            model, model, action_space_list,
-            lr=lr, decay_range=decay_range, device=device,
+            model,              # q_network
+            model,              # model
+            action_space_list,
+            lr=lr,
+            decay_range=decay_range,
+            device=device,
             replay_buffer_size=replay_buffer_size,
             obs_preprocessor=preprocess_single,
         )
     except TypeError:
         agent = DDQNAgent(
-            model, action_space_list,
-            lr=lr, decay_range=decay_range, device=device,
+            model,
+            action_space_list,
+            lr=lr,
+            decay_range=decay_range,
+            device=device,
             replay_buffer_size=replay_buffer_size,
             obs_preprocessor=preprocess_single,
         )
 
-    # —— 训练循环
+    # —— 日志与统计（与原逻辑对齐）
     training_logs = []
     pbar = tqdm(range(num_episodes), desc='Episodes', dynamic_ncols=True)
+
     episode = 0
     success_count_total = 0
-
-    # 动作映射
-    if ACTION_MAP is None:
-        action_map = list(range(n_actions))
-    else:
-        assert len(ACTION_MAP) == n_actions, "ACTION_MAP 长度需等于动作数"
-        action_map = ACTION_MAP
+    stage_success_count = 0
+    stage_episode_count = 0
 
     while (scheduler is None) or (scheduler.current_stage <= scheduler.max_stage):
         if episode >= num_episodes:
             break
 
-        # 选图 & 构造 env
+        # 1) 当前阶段地图 & 构建 env
         cur_map_cfg = scheduler.get_updated_map_settings() if scheduler else map_settings
         map_type, cfg = next(iter(cur_map_cfg.items()))
         env = build_env_from_raw(cfg)
 
         stage_id = (scheduler.current_stage if scheduler else -1)
         cpx_val = cfg.get("complexity", None)
-        if cpx_val is not None and np.isfinite(cpx_val):
-            pbar.write(f"🟢 地图：{map_type} | Stage {stage_id} | Agents={env.num_agents} | Complexity={float(cpx_val):.3f}")
+        if cpx_val is not None:
+            pbar.write(f"🟢 使用地图：{map_type} | Stage {stage_id} | Agents={env.num_agents} | Complexity={float(cpx_val):.3f}")
         else:
-            pbar.write(f"🟢 地图：{map_type} | Stage {stage_id} | Agents={env.num_agents}")
+            pbar.write(f"🟢 使用地图：{map_type} | Stage {stage_id} | Agents={env.num_agents}")
 
-        # reset
+        # 2) reset
         try:
             obs, info = env.reset()
         except Exception:
-            obs = env.reset(); info = {}
+            obs = env.reset()
+            info = {}
 
-        target_idx = np.random.randint(env.num_agents)
-        teammates = [AStarAgent() if i != target_idx else None for i in range(env.num_agents)]
-        goal = tuple(env.goals[target_idx])
+        # —— 用观测长度作为本集的“真实代理数”
+        n_agents_pg = _pogema_num_agents_from_obs(obs)
+        idle_idx = _idle_action_index(env, 0)
+
+        # 目标代理索引（避免超界）
+        target_idx = int(np.random.randint(n_agents_pg))
+        # 队友（数量与观测同步）
+        teammates = [None] * n_agents_pg
+        for i in range(n_agents_pg):
+            if i != target_idx:
+                teammates[i] = AStarAgent()
+
+        # 目标 & 初始状态
+        try:
+            goal = tuple(env.goals[target_idx])
+        except Exception:
+            # 极端兜底：从 obs 里拿
+            try:
+                goal = tuple(obs[target_idx]["global_goal"])
+            except Exception:
+                goal = tuple(obs[target_idx]["global_xy"])  # 没法确定时，用当前位置兜底
         state = obs[target_idx]
 
-        # 动态步数预算（用最短路长度或曼哈顿）
-        try:
-            opt_len = max(1, len(env.global_guidance[target_idx]) + 1)
-        except Exception:
-            try:
-                sx, sy = state['global_xy']; gx, gy = goal
-                opt_len = max(1, abs(sx - gx) + abs(sy - gy) + 1)
-            except Exception:
-                opt_len = 60
-        timesteps_per_episode = min(400, max(60, int(opt_len * 6)))
-
-        # 统计
+        # 3) 跑一集（与原逻辑同：时长上限 + 重放学习）
         success_flag = False
         retrain_count = 0
         episode_start_time = time.time()
-        last_pos = tuple(state['global_xy'])
-        no_move_steps = 0
-        force_random_left = 0   # 反卡死：接下来强制随机动作的剩余步数
+
+        # 与你原本的一致：线性增长步数
+        timesteps_per_episode = 50 + 10 * episode
+        # 同时尊重 env / cfg 上限（可选）
+        cfg_max = int(cfg.get("max_episode_steps", 10**9))
+        env_max = getattr(env, "max_episode_steps", cfg_max)
+        timesteps_per_episode = min(timesteps_per_episode, int(env_max))
+
+        # 轻微探索（如果你的 DDQN 内部已有 epsilon 策略，这里也兼容；
+        # 若没有，则下方会使用 agent.epsilon 作 ε-greedy）
+        model.eval()
 
         for t in range(timesteps_per_episode):
             if time.time() - episode_start_time > max_episode_seconds:
-                pbar.write(f"⏰ Episode {episode} 超时（>{max_episode_seconds}s）")
+                pbar.write(f"⏰ Episode {episode} 超时（>{max_episode_seconds}s），终止本集")
                 break
 
-            actions = []
-            for i in range(env.num_agents):
+            # —— 组动作：确保长度 == n_agents_pg，且是纯 int
+            actions = [idle_idx] * n_agents_pg
+            for i in range(n_agents_pg):
                 if i == target_idx:
-                    # ε-greedy：早期充分探索
-                    do_random = (random.random() < agent.epsilon) or (force_random_left > 0)
-                    if do_random:
-                        net_action = random.randrange(n_actions)
+                    # 目标智能体：NN + ε-greedy
+                    x = _obs_to_tensor_CDHW(obs[i], device, expected_c=in_channels)  # [1,C,D,H,W]
+                    eps = float(getattr(agent, "epsilon", 0.1))
+                    if random.random() < eps:
+                        a = random.randrange(n_actions)
                     else:
-                        x = _obs_to_tensor_CDHW(obs[i], device, expected_c=in_channels)
-                        if x.shape[1] != in_channels:
-                            raise RuntimeError(f"[PrepMismatch] x.shape={tuple(x.shape)}, expected C={in_channels}")
                         with torch.no_grad():
-                            q = agent.q_network(x)           # [1, n_actions]
-                            net_action = int(torch.argmax(q, dim=1).item())
-                    env_action = action_map[net_action]
-                    actions.append(env_action)
+                            q = agent.q_network(x)
+                            a = int(torch.argmax(q, dim=1))
+                    actions[i] = a
                 else:
+                    # 队友：A*（失败兜底 idle）
                     try:
-                        actions.append(int(teammates[i].act(obs[i])))
+                        a_tm = int(teammates[i].act(obs[i]))
                     except Exception:
-                        actions.append(0)
+                        a_tm = idle_idx
+                    actions[i] = a_tm
 
-            obs, reward, terminated, truncated, info = env.step(actions)
+            # —— 环境前进一步（严格传 tuple[int]，长度要与 pogema 代理数一致）
+            obs, reward, terminated, truncated, info = env.step(tuple(int(a) for a in actions))
 
-            # 成功判定
-            agent_pos = tuple(obs[target_idx]['global_xy'])
+            # 到达判定
+            try:
+                agent_pos = tuple(obs[target_idx]['global_xy'])
+            except Exception:
+                # 兜底
+                agent_pos = tuple(state.get('global_xy', (0, 0)))
             done = (agent_pos == goal)
             terminated[target_idx] = done
+
             if done:
                 success_flag = True
                 break
-
-            # 稠密 shaping（鼓励逼近目标）
-            if USE_DENSE_SHAPING:
-                try:
-                    sx, sy = state['global_xy']
-                    gx, gy = goal
-                    prev_dist = abs(sx - gx) + abs(sy - gy)
-                    cx, cy = agent_pos
-                    new_dist = abs(cx - gx) + abs(cy - gy)
-                    shaping = (prev_dist - new_dist) * SHAPING_SCALE
-                    reward[target_idx] = float(reward[target_idx]) + float(shaping)
-                except Exception:
-                    pass
-
-            # 反卡死：未移动计数
-            if agent_pos == last_pos:
-                no_move_steps += 1
-                if no_move_steps == UNSTUCK_RANDOM_AFTER:
-                    force_random_left = UNSTUCK_RANDOM_STEPS
-                if no_move_steps >= STUCK_PATIENCE:
-                    pbar.write(f"🧊 Episode {episode} 提前终止（{STUCK_PATIENCE} 步未移动）")
-                    break
-            else:
-                no_move_steps = 0
-                last_pos = agent_pos
-
-            # 下一步减去强制随机预算
-            if force_random_left > 0:
-                force_random_left -= 1
 
             # 经验 & 学习
             agent.store(
@@ -610,64 +924,46 @@ def train(
                 retrain_count += 1
                 _ = agent.retrain(batch_size)
 
-        # —— 统计 & 日志
+        # 4) 统计 & 日志（与原逻辑一致）
         if success_flag:
             success_count_total += 1
+            stage_success_count += 1
 
+        stage_episode_count += 1
         episode += 1
         success_rate = success_count_total / max(1, episode)
-        writer.add_scalar('Success/episode', int(success_flag), episode)
-        writer.add_scalar('SuccessRate/global', success_rate, episode)
+        writer.add_scalar('success_rate', success_rate, episode)
+        writer.add_scalar('success', 1 if success_flag else 0, episode)
 
-        pbar.set_postfix(Stage=(stage_id if scheduler else "-"),
-                         success=int(success_flag),
-                         SR=f"{success_rate:.3f}")
-        pbar.update(1)
+        pbar.set_postfix(
+            Stage=(stage_id if scheduler else "-"),
+            success=int(success_flag),
+            success_rate=f"{success_rate:.3f}",
+        )
+        pbar.update(0)  # 与你给的版本保持一致
 
         training_logs.append({
             "episode": episode,
             "stage": stage_id,
             "map": map_type,
-            "agents": getattr(env, "num_agents", None),
+            "agents": n_agents_pg,
             "complexity": (float(cpx_val) if cpx_val is not None else np.nan),
             "success": int(success_flag),
             "success_rate": float(success_rate),
         })
 
-        # —— 课程晋级
-                # ===== 5) 课程逻辑：自动晋级 / 重练 =====
+        # 5) 课程逻辑（完全保持你的风格）
         if scheduler is not None:
-            # 把本集结果写入滑窗/阶段统计
             scheduler.add_episode_result(int(success_flag))
-
-            # 已满足窗口/阶段成功率 + 已达最少集数 -> 自动晋级
             if scheduler.should_advance():
-                # 以晋级前的 stage_id 做 checkpoint 命名
-                ckpt_path = Path("models") / f"stage{stage_id}_passed.pt"
-                ckpt_path.parent.mkdir(parents=True, exist_ok=True)
-                torch.save(model.state_dict(), ckpt_path.as_posix())
-
-                # 打印你想要的提示（advance 内也会打印区间/窗口 SR）
-                pbar.write(f"✅ 通过 Stage {stage_id}，已保存 {ckpt_path.name}")
                 scheduler.advance(pbar)
-
-                # 若全部阶段完成，结束训练
                 if scheduler.is_done():
-                    pbar.write("🎉 所有阶段完成，训练结束！")
                     break
+            else:
+                if scheduler._ep_in_stage >= scheduler.min_episodes_per_stage:
+                    scheduler.repeat_stage(pbar)
 
-                # 晋级后下一集会自动从新阶段的地图池里取图（while 顶部会重新 get_updated_map_settings）
-            
-            # 没达到阈值但已经跑满最少集数 -> 重复当前阶段（重置统计重新来过）
-            elif scheduler._ep_in_stage >= scheduler.min_episodes_per_stage:
-                pbar.write(
-                    f"🔁 Stage {scheduler.current_stage} 未达标："
-                    f"SR(win)={scheduler.window_sr():.2f}, "
-                    f"SR(stage)={scheduler.stage_sr():.2f}，重复该阶段"
-                )
-                scheduler.repeat_stage(pbar)
-
-    # —— 保存每集日志
+    # —— 收尾
     df = pd.DataFrame(training_logs)
     csv_path = run_dir / "episodes.csv"
     df.to_csv(csv_path, index=False, encoding="utf-8-sig")
@@ -681,13 +977,17 @@ if __name__ == "__main__":
     os.makedirs('logs', exist_ok=True)
     os.makedirs('models', exist_ok=True)
 
+    # 1) 读 YAML
     with open(MAP_SETTINGS_PATH, "r", encoding="utf-8") as f:
         base_map_settings = yaml.safe_load(f)
+
     if isinstance(base_map_settings, list):
         base_map_settings = {(m.get("name") or f"map_{i}"): m for i, m in enumerate(base_map_settings)}
 
+    # 2) 合并复杂度（来自 CSV 的 nn_complexity）
     base_map_settings = _merge_complexity_from_csv(base_map_settings)
 
+    # 3) 构建 Scheduler
     scheduler = ComplexityScheduler(
         base_map_settings=base_map_settings,
         n_stages=N_STAGES,
@@ -700,9 +1000,11 @@ if __name__ == "__main__":
         seed=0,
     )
 
+    # 4) 设备 & 模型
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = CRNNModel().to(device)
 
+    # 5) 训练
     agent = train(
         model=model,
         scheduler=scheduler,
@@ -718,6 +1020,7 @@ if __name__ == "__main__":
         run_dir=RUN_DIR,
     )
 
+    # 6) 保存模型权重
     out_path = Path(MODEL_OUT)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     torch.save(model.state_dict(), out_path.as_posix())
