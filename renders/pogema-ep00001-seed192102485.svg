@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+             width="512" height="512" viewBox="0 -3500 3500 3500">
+<defs>
+
+        <rect id="obstacle" width="70" height="70" fill="#84A1AE" rx="15"/>
+        <style>
+        .line {stroke: #84A1AE; stroke-width: 10;}
+        .agent {r: 35;}
+        .target {fill: none; stroke-width: 10; r: 35;}
+        </style>
+        
+</defs>
+
+<line class="line" x1="-50.0" x2="-50.0" y1="0" y2="-3500" />
+<line class="line" x1="50.0" x2="50.0" y1="0" y2="-3500" />
+<line class="line" x1="150.0" x2="150.0" y1="0" y2="-3500" />
+<line class="line" x1="250.0" x2="250.0" y1="0" y2="-3500" />
+<line class="line" x1="350.0" x2="350.0" y1="0" y2="-3500" />
+<line class="line" x1="450.0" x2="450.0" y1="0" y2="-3500" />
+<line class="line" x1="550.0" x2="550.0" y1="0" y2="-3500" />
+<line class="line" x1="650.0" x2="650.0" y1="0" y2="-3500" />
+<line class="line" x1="750.0" x2="750.0" y1="0" y2="-3500" />
+<line class="line" x1="850.0" x2="850.0" y1="0" y2="-3500" />
+<line class="line" x1="950.0" x2="950.0" y1="0" y2="-3500" />
+<line class="line" x1="1050.0" x2="1050.0" y1="0" y2="-3500" />
+<line class="line" x1="1150.0" x2="1150.0" y1="0" y2="-3500" />
+<line class="line" x1="1250.0" x2="1250.0" y1="0" y2="-3500" />
+<line class="line" x1="1350.0" x2="1350.0" y1="0" y2="-3500" />
+<line class="line" x1="1450.0" x2="1450.0" y1="0" y2="-3500" />
+<line class="line" x1="1550.0" x2="1550.0" y1="0" y2="-3500" />
+<line class="line" x1="1650.0" x2="1650.0" y1="0" y2="-3500" />
+<line class="line" x1="1750.0" x2="1750.0" y1="0" y2="-3500" />
+<line class="line" x1="1850.0" x2="1850.0" y1="0" y2="-3500" />
+<line class="line" x1="1950.0" x2="1950.0" y1="0" y2="-3500" />
+<line class="line" x1="2050.0" x2="2050.0" y1="0" y2="-3500" />
+<line class="line" x1="2150.0" x2="2150.0" y1="0" y2="-3500" />
+<line class="line" x1="2250.0" x2="2250.0" y1="0" y2="-3500" />
+<line class="line" x1="2350.0" x2="2350.0" y1="0" y2="-3500" />
+<line class="line" x1="2450.0" x2="2450.0" y1="0" y2="-3500" />
+<line class="line" x1="2550.0" x2="2550.0" y1="0" y2="-3500" />
+<line class="line" x1="2650.0" x2="2650.0" y1="0" y2="-3500" />
+<line class="line" x1="2750.0" x2="2750.0" y1="0" y2="-3500" />
+<line class="line" x1="2850.0" x2="2850.0" y1="0" y2="-3500" />
+<line class="line" x1="2950.0" x2="2950.0" y1="0" y2="-3500" />
+<line class="line" x1="3050.0" x2="3050.0" y1="0" y2="-3500" />
+<line class="line" x1="3150.0" x2="3150.0" y1="0" y2="-3500" />
+<line class="line" x1="3250.0" x2="3250.0" y1="0" y2="-3500" />
+<line class="line" x1="3350.0" x2="3350.0" y1="0" y2="-3500" />
+<line class="line" x1="3450.0" x2="3450.0" y1="0" y2="-3500" />
+<line class="line" x1="0" x2="3500" y1="50.0" y2="50.0" />
+<line class="line" x1="0" x2="3500" y1="-50.0" y2="-50.0" />
+<line class="line" x1="0" x2="3500" y1="-150.0" y2="-150.0" />
+<line class="line" x1="0" x2="3500" y1="-250.0" y2="-250.0" />
+<line class="line" x1="0" x2="3500" y1="-350.0" y2="-350.0" />
+<line class="line" x1="0" x2="3500" y1="-450.0" y2="-450.0" />
+<line class="line" x1="0" x2="3500" y1="-550.0" y2="-550.0" />
+<line class="line" x1="0" x2="3500" y1="-650.0" y2="-650.0" />
+<line class="line" x1="0" x2="3500" y1="-750.0" y2="-750.0" />
+<line class="line" x1="0" x2="3500" y1="-850.0" y2="-850.0" />
+<line class="line" x1="0" x2="3500" y1="-950.0" y2="-950.0" />
+<line class="line" x1="0" x2="3500" y1="-1050.0" y2="-1050.0" />
+<line class="line" x1="0" x2="3500" y1="-1150.0" y2="-1150.0" />
+<line class="line" x1="0" x2="3500" y1="-1250.0" y2="-1250.0" />
+<line class="line" x1="0" x2="3500" y1="-1350.0" y2="-1350.0" />
+<line class="line" x1="0" x2="3500" y1="-1450.0" y2="-1450.0" />
+<line class="line" x1="0" x2="3500" y1="-1550.0" y2="-1550.0" />
+<line class="line" x1="0" x2="3500" y1="-1650.0" y2="-1650.0" />
+<line class="line" x1="0" x2="3500" y1="-1750.0" y2="-1750.0" />
+<line class="line" x1="0" x2="3500" y1="-1850.0" y2="-1850.0" />
+<line class="line" x1="0" x2="3500" y1="-1950.0" y2="-1950.0" />
+<line class="line" x1="0" x2="3500" y1="-2050.0" y2="-2050.0" />
+<line class="line" x1="0" x2="3500" y1="-2150.0" y2="-2150.0" />
+<line class="line" x1="0" x2="3500" y1="-2250.0" y2="-2250.0" />
+<line class="line" x1="0" x2="3500" y1="-2350.0" y2="-2350.0" />
+<line class="line" x1="0" x2="3500" y1="-2450.0" y2="-2450.0" />
+<line class="line" x1="0" x2="3500" y1="-2550.0" y2="-2550.0" />
+<line class="line" x1="0" x2="3500" y1="-2650.0" y2="-2650.0" />
+<line class="line" x1="0" x2="3500" y1="-2750.0" y2="-2750.0" />
+<line class="line" x1="0" x2="3500" y1="-2850.0" y2="-2850.0" />
+<line class="line" x1="0" x2="3500" y1="-2950.0" y2="-2950.0" />
+<line class="line" x1="0" x2="3500" y1="-3050.0" y2="-3050.0" />
+<line class="line" x1="0" x2="3500" y1="-3150.0" y2="-3150.0" />
+<line class="line" x1="0" x2="3500" y1="-3250.0" y2="-3250.0" />
+<line class="line" x1="0" x2="3500" y1="-3350.0" y2="-3350.0" />
+<line class="line" x1="0" x2="3500" y1="-3450.0" y2="-3450.0" />
+<use href="#obstacle" x="65" y="-135" />
+<use href="#obstacle" x="65" y="-235" />
+<use href="#obstacle" x="65" y="-335" />
+<use href="#obstacle" x="65" y="-435" />
+<use href="#obstacle" x="65" y="-535" />
+<use href="#obstacle" x="65" y="-635" />
+<use href="#obstacle" x="65" y="-735" />
+<use href="#obstacle" x="65" y="-835" />
+<use href="#obstacle" x="65" y="-935" />
+<use href="#obstacle" x="65" y="-1035" />
+<use href="#obstacle" x="65" y="-1135" />
+<use href="#obstacle" x="65" y="-1235" />
+<use href="#obstacle" x="65" y="-1335" />
+<use href="#obstacle" x="65" y="-1435" />
+<use href="#obstacle" x="65" y="-1535" />
+<use href="#obstacle" x="65" y="-1635" />
+<use href="#obstacle" x="65" y="-1735" />
+<use href="#obstacle" x="65" y="-1835" />
+<use href="#obstacle" x="65" y="-1935" />
+<use href="#obstacle" x="65" y="-2035" />
+<use href="#obstacle" x="65" y="-2135" />
+<use href="#obstacle" x="65" y="-2235" />
+<use href="#obstacle" x="65" y="-2335" />
+<use href="#obstacle" x="65" y="-2435" />
+<use href="#obstacle" x="65" y="-2535" />
+<use href="#obstacle" x="65" y="-2635" />
+<use href="#obstacle" x="65" y="-2735" />
+<use href="#obstacle" x="65" y="-2835" />
+<use href="#obstacle" x="65" y="-2935" />
+<use href="#obstacle" x="65" y="-3035" />
+<use href="#obstacle" x="65" y="-3135" />
+<use href="#obstacle" x="65" y="-3235" />
+<use href="#obstacle" x="65" y="-3335" />
+<use href="#obstacle" x="65" y="-3435" />
+<use href="#obstacle" x="165" y="-135" />
+<use href="#obstacle" x="165" y="-3335" />
+<use href="#obstacle" x="165" y="-3435" />
+<use href="#obstacle" x="265" y="-135" />
+<use href="#obstacle" x="265" y="-535" />
+<use href="#obstacle" x="265" y="-3035" />
+<use href="#obstacle" x="265" y="-3435" />
+<use href="#obstacle" x="365" y="-135" />
+<use href="#obstacle" x="365" y="-435" />
+<use href="#obstacle" x="365" y="-735" />
+<use href="#obstacle" x="365" y="-835" />
+<use href="#obstacle" x="365" y="-1435" />
+<use href="#obstacle" x="365" y="-1535" />
+<use href="#obstacle" x="365" y="-1735" />
+<use href="#obstacle" x="365" y="-2235" />
+<use href="#obstacle" x="365" y="-3435" />
+<use href="#obstacle" x="465" y="-135" />
+<use href="#obstacle" x="465" y="-435" />
+<use href="#obstacle" x="465" y="-1235" />
+<use href="#obstacle" x="465" y="-1535" />
+<use href="#obstacle" x="465" y="-3235" />
+<use href="#obstacle" x="465" y="-3435" />
+<use href="#obstacle" x="565" y="-135" />
+<use href="#obstacle" x="565" y="-735" />
+<use href="#obstacle" x="565" y="-2235" />
+<use href="#obstacle" x="565" y="-2435" />
+<use href="#obstacle" x="565" y="-3435" />
+<use href="#obstacle" x="665" y="-135" />
+<use href="#obstacle" x="665" y="-535" />
+<use href="#obstacle" x="665" y="-735" />
+<use href="#obstacle" x="665" y="-1235" />
+<use href="#obstacle" x="665" y="-2135" />
+<use href="#obstacle" x="665" y="-2835" />
+<use href="#obstacle" x="665" y="-3435" />
+<use href="#obstacle" x="765" y="-135" />
+<use href="#obstacle" x="765" y="-335" />
+<use href="#obstacle" x="765" y="-2135" />
+<use href="#obstacle" x="765" y="-3235" />
+<use href="#obstacle" x="765" y="-3435" />
+<use href="#obstacle" x="865" y="-135" />
+<use href="#obstacle" x="865" y="-235" />
+<use href="#obstacle" x="865" y="-3435" />
+<use href="#obstacle" x="965" y="-135" />
+<use href="#obstacle" x="965" y="-335" />
+<use href="#obstacle" x="965" y="-3435" />
+<use href="#obstacle" x="1065" y="-135" />
+<use href="#obstacle" x="1065" y="-1135" />
+<use href="#obstacle" x="1065" y="-1635" />
+<use href="#obstacle" x="1065" y="-3435" />
+<use href="#obstacle" x="1165" y="-135" />
+<use href="#obstacle" x="1165" y="-235" />
+<use href="#obstacle" x="1165" y="-1635" />
+<use href="#obstacle" x="1165" y="-2035" />
+<use href="#obstacle" x="1165" y="-2335" />
+<use href="#obstacle" x="1165" y="-2535" />
+<use href="#obstacle" x="1165" y="-3435" />
+<use href="#obstacle" x="1265" y="-135" />
+<use href="#obstacle" x="1265" y="-1135" />
+<use href="#obstacle" x="1265" y="-2635" />
+<use href="#obstacle" x="1265" y="-2835" />
+<use href="#obstacle" x="1265" y="-3435" />
+<use href="#obstacle" x="1365" y="-135" />
+<use href="#obstacle" x="1365" y="-735" />
+<use href="#obstacle" x="1365" y="-2135" />
+<use href="#obstacle" x="1365" y="-3435" />
+<use href="#obstacle" x="1465" y="-135" />
+<use href="#obstacle" x="1465" y="-235" />
+<use href="#obstacle" x="1465" y="-635" />
+<use href="#obstacle" x="1465" y="-1735" />
+<use href="#obstacle" x="1465" y="-3135" />
+<use href="#obstacle" x="1465" y="-3235" />
+<use href="#obstacle" x="1465" y="-3435" />
+<use href="#obstacle" x="1565" y="-135" />
+<use href="#obstacle" x="1565" y="-335" />
+<use href="#obstacle" x="1565" y="-3235" />
+<use href="#obstacle" x="1565" y="-3435" />
+<use href="#obstacle" x="1665" y="-135" />
+<use href="#obstacle" x="1665" y="-1035" />
+<use href="#obstacle" x="1665" y="-2135" />
+<use href="#obstacle" x="1665" y="-3435" />
+<use href="#obstacle" x="1765" y="-135" />
+<use href="#obstacle" x="1765" y="-935" />
+<use href="#obstacle" x="1765" y="-1335" />
+<use href="#obstacle" x="1765" y="-1835" />
+<use href="#obstacle" x="1765" y="-3435" />
+<use href="#obstacle" x="1865" y="-135" />
+<use href="#obstacle" x="1865" y="-935" />
+<use href="#obstacle" x="1865" y="-1535" />
+<use href="#obstacle" x="1865" y="-2635" />
+<use href="#obstacle" x="1865" y="-2735" />
+<use href="#obstacle" x="1865" y="-3435" />
+<use href="#obstacle" x="1965" y="-135" />
+<use href="#obstacle" x="1965" y="-1635" />
+<use href="#obstacle" x="1965" y="-2635" />
+<use href="#obstacle" x="1965" y="-3435" />
+<use href="#obstacle" x="2065" y="-135" />
+<use href="#obstacle" x="2065" y="-3035" />
+<use href="#obstacle" x="2065" y="-3435" />
+<use href="#obstacle" x="2165" y="-135" />
+<use href="#obstacle" x="2165" y="-2435" />
+<use href="#obstacle" x="2165" y="-2835" />
+<use href="#obstacle" x="2165" y="-3435" />
+<use href="#obstacle" x="2265" y="-135" />
+<use href="#obstacle" x="2265" y="-835" />
+<use href="#obstacle" x="2265" y="-1535" />
+<use href="#obstacle" x="2265" y="-2035" />
+<use href="#obstacle" x="2265" y="-3135" />
+<use href="#obstacle" x="2265" y="-3435" />
+<use href="#obstacle" x="2365" y="-135" />
+<use href="#obstacle" x="2365" y="-2635" />
+<use href="#obstacle" x="2365" y="-3435" />
+<use href="#obstacle" x="2465" y="-135" />
+<use href="#obstacle" x="2465" y="-435" />
+<use href="#obstacle" x="2465" y="-735" />
+<use href="#obstacle" x="2465" y="-1035" />
+<use href="#obstacle" x="2465" y="-2235" />
+<use href="#obstacle" x="2465" y="-3335" />
+<use href="#obstacle" x="2465" y="-3435" />
+<use href="#obstacle" x="2565" y="-135" />
+<use href="#obstacle" x="2565" y="-3135" />
+<use href="#obstacle" x="2565" y="-3435" />
+<use href="#obstacle" x="2665" y="-135" />
+<use href="#obstacle" x="2665" y="-435" />
+<use href="#obstacle" x="2665" y="-535" />
+<use href="#obstacle" x="2665" y="-1835" />
+<use href="#obstacle" x="2665" y="-3435" />
+<use href="#obstacle" x="2765" y="-135" />
+<use href="#obstacle" x="2765" y="-1035" />
+<use href="#obstacle" x="2765" y="-1335" />
+<use href="#obstacle" x="2765" y="-1535" />
+<use href="#obstacle" x="2765" y="-3435" />
+<use href="#obstacle" x="2865" y="-135" />
+<use href="#obstacle" x="2865" y="-3435" />
+<use href="#obstacle" x="2965" y="-135" />
+<use href="#obstacle" x="2965" y="-1435" />
+<use href="#obstacle" x="2965" y="-1735" />
+<use href="#obstacle" x="2965" y="-3435" />
+<use href="#obstacle" x="3065" y="-135" />
+<use href="#obstacle" x="3065" y="-2735" />
+<use href="#obstacle" x="3065" y="-3435" />
+<use href="#obstacle" x="3165" y="-135" />
+<use href="#obstacle" x="3165" y="-1135" />
+<use href="#obstacle" x="3165" y="-3435" />
+<use href="#obstacle" x="3265" y="-135" />
+<use href="#obstacle" x="3265" y="-2635" />
+<use href="#obstacle" x="3265" y="-2835" />
+<use href="#obstacle" x="3265" y="-3335" />
+<use href="#obstacle" x="3265" y="-3435" />
+<use href="#obstacle" x="3365" y="-135" />
+<use href="#obstacle" x="3365" y="-235" />
+<use href="#obstacle" x="3365" y="-335" />
+<use href="#obstacle" x="3365" y="-435" />
+<use href="#obstacle" x="3365" y="-535" />
+<use href="#obstacle" x="3365" y="-635" />
+<use href="#obstacle" x="3365" y="-735" />
+<use href="#obstacle" x="3365" y="-835" />
+<use href="#obstacle" x="3365" y="-935" />
+<use href="#obstacle" x="3365" y="-1035" />
+<use href="#obstacle" x="3365" y="-1135" />
+<use href="#obstacle" x="3365" y="-1235" />
+<use href="#obstacle" x="3365" y="-1335" />
+<use href="#obstacle" x="3365" y="-1435" />
+<use href="#obstacle" x="3365" y="-1535" />
+<use href="#obstacle" x="3365" y="-1635" />
+<use href="#obstacle" x="3365" y="-1735" />
+<use href="#obstacle" x="3365" y="-1835" />
+<use href="#obstacle" x="3365" y="-1935" />
+<use href="#obstacle" x="3365" y="-2035" />
+<use href="#obstacle" x="3365" y="-2135" />
+<use href="#obstacle" x="3365" y="-2235" />
+<use href="#obstacle" x="3365" y="-2335" />
+<use href="#obstacle" x="3365" y="-2435" />
+<use href="#obstacle" x="3365" y="-2535" />
+<use href="#obstacle" x="3365" y="-2635" />
+<use href="#obstacle" x="3365" y="-2735" />
+<use href="#obstacle" x="3365" y="-2835" />
+<use href="#obstacle" x="3365" y="-2935" />
+<use href="#obstacle" x="3365" y="-3035" />
+<use href="#obstacle" x="3365" y="-3135" />
+<use href="#obstacle" x="3365" y="-3235" />
+<use href="#obstacle" x="3365" y="-3335" />
+<use href="#obstacle" x="3365" y="-3435" />
+<circle class="agent" cx="1600" cy="-2200" fill="#c1433c" r="35"> <animate attributeName="cy" dur="13.0s" keyTimes="0.0;0.0188679245;0.0377358491;0.0566037736;0.0754716981;0.0943396226;0.1132075472;0.1320754717;0.1509433962;0.1698113208;0.1886792453;0.2075471698;0.2264150943;0.2452830189;0.2641509434;0.2830188679;0.3018867925;0.320754717;0.3396226415;0.3962264151;0.4150943396;0.4339622642;0.4528301887;0.8113207547;0.8301886792;0.8490566038;0.9622641509;0.9811320755;1.0" repeatCount="indefinite" values="-2200;-2200;-2100;-2000;-1900;-1800;-1700;-1600;-1500;-1400;-1300;-1200;-1100;-1000;-900;-800;-700;-700;-600;-600;-700;-700;-800;-800;-900;-1000;-1000;-1100;-1100"/>
+<animate attributeName="cx" dur="13.0s" keyTimes="0.0;0.0188679245;0.4150943396;0.4339622642;0.4528301887;0.4716981132;0.5283018868;0.5471698113;0.5660377358;0.5849056604;0.6037735849;0.6603773585;0.679245283;0.6981132075;0.7169811321;0.7358490566;0.7924528302;0.8113207547;0.8490566038;0.8679245283;0.9245283019;0.9433962264;0.9622641509;1.0" repeatCount="indefinite" values="1600;1600;1600;1500;1500;1400;1400;1300;1200;1100;1000;1000;900;800;700;600;600;500;500;400;400;300;200;200"/>
+<animate attributeName="visibility" dur="13.0s" keyTimes="0.0;0.0188679245;1.0" repeatCount="indefinite" values="visible;visible;visible"/> </circle>
+<circle class="agent" cx="500" cy="-2100" fill="#2e6f9e" r="35"> <animate attributeName="cy" dur="13.0s" keyTimes="0.0;0.0188679245;0.0377358491;0.0566037736;0.1509433962;0.1698113208;0.4528301887;0.4716981132;0.4905660377;0.5471698113;0.5660377358;0.5849056604;1.0" repeatCount="indefinite" values="-2100;-2100;-2100;-2000;-2000;-1900;-1900;-1800;-1700;-1700;-1600;-1500;-1500"/>
+<animate attributeName="cx" dur="13.0s" keyTimes="0.0;0.0188679245;0.0377358491;0.0566037736;0.0754716981;0.0943396226;0.1132075472;0.1320754717;0.1509433962;0.1698113208;0.1886792453;0.2075471698;0.2264150943;0.2452830189;0.2641509434;0.2830188679;0.3018867925;0.320754717;0.3396226415;0.358490566;0.3773584906;0.3962264151;0.4150943396;0.4339622642;0.4528301887;0.4905660377;0.5094339623;0.5283018868;0.5471698113;1.0" repeatCount="indefinite" values="500;500;600;600;700;800;900;1000;1100;1100;1200;1300;1400;1500;1600;1700;1800;1900;2000;2100;2200;2300;2400;2500;2600;2600;2700;2800;2900;2900"/>
+<animate attributeName="visibility" dur="13.0s" keyTimes="0.0;0.0188679245;1.0" repeatCount="indefinite" values="visible;visible;visible"/> </circle>
+<circle class="agent" cx="1900" cy="-3000" fill="#6e81af" r="35"> <animate attributeName="cy" dur="13.0s" keyTimes="0.0;0.0188679245;0.0377358491;0.0943396226;0.1132075472;0.3018867925;0.320754717;1.0" repeatCount="indefinite" values="-3000;-3000;-3100;-3100;-3200;-3200;-3100;-3100"/>
+<animate attributeName="cx" dur="13.0s" keyTimes="0.0;0.0188679245;0.0377358491;0.0566037736;0.0754716981;0.0943396226;0.1132075472;0.1320754717;0.1509433962;0.1698113208;0.1886792453;0.2075471698;0.2264150943;0.2452830189;0.2641509434;0.2830188679;0.3018867925;1.0" repeatCount="indefinite" values="1900;1900;1900;2000;2100;2200;2200;2300;2400;2500;2600;2700;2800;2900;3000;3100;3200;3200"/>
+<animate attributeName="visibility" dur="13.0s" keyTimes="0.0;0.0188679245;1.0" repeatCount="indefinite" values="visible;visible;visible"/> </circle>
+<circle class="agent" cx="2700" cy="-1600" fill="#00b9c8" r="35"> <animate attributeName="cy" dur="13.0s" keyTimes="0.0;0.0188679245;0.0943396226;0.1132075472;0.1320754717;0.1509433962;0.1698113208;0.1886792453;0.2075471698;0.2264150943;0.2452830189;0.2641509434;0.2830188679;1.0" repeatCount="indefinite" values="-1600;-1600;-1600;-1500;-1400;-1300;-1200;-1100;-1000;-1000;-900;-900;-800;-800"/>
+<animate attributeName="cx" dur="13.0s" keyTimes="0.0;0.0188679245;0.0377358491;0.0566037736;0.0754716981;0.0943396226;0.2075471698;0.2264150943;0.2452830189;0.2641509434;1.0" repeatCount="indefinite" values="2700;2700;2800;2900;3000;3100;3100;3200;3200;3300;3300"/>
+<animate attributeName="visibility" dur="13.0s" keyTimes="0.0;0.0188679245;1.0" repeatCount="indefinite" values="visible;visible;visible"/> </circle>
+<circle class="target" cx="200" cy="-1100" r="35" stroke="#c1433c"> <animate attributeName="visibility" dur="13.0s" keyTimes="0.0;0.0188679245;1.0" repeatCount="indefinite" values="visible;visible;visible"/> </circle>
+<circle class="target" cx="2900" cy="-1500" r="35" stroke="#2e6f9e"> <animate attributeName="visibility" dur="13.0s" keyTimes="0.0;0.0188679245;1.0" repeatCount="indefinite" values="visible;visible;visible"/> </circle>
+<circle class="target" cx="3200" cy="-3100" r="35" stroke="#6e81af"> <animate attributeName="visibility" dur="13.0s" keyTimes="0.0;0.0188679245;1.0" repeatCount="indefinite" values="visible;visible;visible"/> </circle>
+<circle class="target" cx="3300" cy="-800" r="35" stroke="#00b9c8"> <animate attributeName="visibility" dur="13.0s" keyTimes="0.0;0.0188679245;1.0" repeatCount="indefinite" values="visible;visible;visible"/> </circle>
+</svg>

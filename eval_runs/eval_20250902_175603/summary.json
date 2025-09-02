@@ -1,0 +1,31 @@
+{
+  "episodes": 100,
+  "success_rate": 0.11,
+  "avg_steps": 237.02,
+  "collision_per_step": 0.0,
+  "map_sizes": [
+    32,
+    64,
+    96,
+    128
+  ],
+  "agent_counts": [
+    2,
+    4,
+    8,
+    16
+  ],
+  "densities": [
+    0.1,
+    0.3,
+    0.5,
+    0.7
+  ],
+  "device": "cpu",
+  "seed": 42,
+  "per_episode_seed": true,
+  "weights_path": ".\\models\\best_model.pt",
+  "created_at": "2025-09-02T17:56:25",
+  "nn_vs_real_pearson": 0.479358,
+  "calibration_csv": "eval_runs\\eval_20250902_175603\\calibration_by_nn_complexity.csv"
+}

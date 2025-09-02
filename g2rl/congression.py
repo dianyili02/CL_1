@@ -24,11 +24,11 @@ from torch.utils.data import Dataset, DataLoader
 warnings.filterwarnings("ignore")
 
 # ============ 配置（按需改） ============
-SAVE_DIR = r"C:/Users/MSc_SEIoT_1/MAPF_G2RL-main - train/0827"  # ← 你想保存的目录
+SAVE_DIR = r"C:/Users/dell/Desktop/CL_1/0902"  # ← 你想保存的目录
 os.makedirs(SAVE_DIR, exist_ok=True)  # 若不存在则创建
 
 CSV_CANDIDATES = [
-    r"C:/Users/MSc_SEIoT_1/MAPF_G2RL-main - train/train_gray3d-Copy-FDA.csv",
+    r"C:/Users/dell/Desktop/CL_1/train_gray3d-Copy-FDA.csv",
 ]
 TARGET_COL = None  # None = 自动识别（success_rate / Complexity / complexity / target / y）
 
@@ -184,7 +184,34 @@ def main():
     print("✅ 可用样本数:", len(dff))
 
     # 5) 取X/y
-    X_all = dff[[mapping[f] for f in used_features]].astype(float).values
+    # X_all = dff[[mapping[f] for f in used_features]].astype(float).values
+
+
+    cols = [mapping[f.strip()] for f in used_features]  # 注意 f.strip() 去掉 ' FDA' 前的空格问题
+
+# 针对每一列做清洗
+    clean = dff[cols].apply(
+        lambda col: col.astype(str)  # 转成字符串
+                   .str.replace(',', '', regex=False)
+                   .str.replace('%', '', regex=False)
+                   .str.replace(r'[^0-9eE+\-\.]', '', regex=True)  # 保留数值相关字符
+    )
+
+# 转换成数值，非法的转 NaN
+    clean = clean.apply(pd.to_numeric, errors='coerce')
+
+# 检查坏行
+    bad_rows = clean.isna().any(axis=1)
+    if bad_rows.any():
+        print(f"[清洗] 有 {bad_rows.sum()} 行包含非数值特征：")
+        print(dff.loc[bad_rows, cols].head())
+
+# 丢弃坏行
+    clean = clean.dropna(axis=0, how='any')
+
+    X_all = clean.values
+
+
     y_all = dff[target_col].astype(float).values
 
     # 6) 划分训练/验证
@@ -279,7 +306,41 @@ def main():
     # 13) 全表预测（对原 df；缺失保留 NaN）
     #    仅对原 df 中“特征完整”的行做预测
     mask_ok = ~df[[mapping[f] for f in used_features]].isna().any(axis=1)
-    X_full = df.loc[mask_ok, [mapping[f] for f in used_features]].astype(float).values
+    # X_full = df.loc[mask_ok, [mapping[f] for f in used_features]].astype(float).values
+    # ==== 统一修正特征名空格等问题 ====
+    used_features = [f.strip() for f in used_features]
+    cols = [mapping[f] for f in used_features]
+
+# ==== 先对子表做数值清洗（逐列 .str 操作）====
+    raw_feat = df.loc[:, cols].copy()
+
+    def _clean_series(s):
+        return (s.astype(str)
+                .str.replace(',', '', regex=False)      # 去掉千分位
+                .str.replace('%', '', regex=False)      # 去掉百分号
+                .str.replace(r'[^0-9eE+\.-]', '', regex=True))  # 仅保留数字/正负号/小数点/eE
+
+    clean_feat = raw_feat.apply(_clean_series)
+    num_feat = clean_feat.apply(pd.to_numeric, errors='coerce')
+
+# ==== 记录并处理坏行 ====
+    bad_rows = num_feat.isna().any(axis=1)
+    if bad_rows.any():
+        print(f"[清洗] 发现 {bad_rows.sum()} 行含非数值特征，将被剔除。示例：")
+    # 打印前 5 行问题样本，便于定位哪一列脏数据
+        print(raw_feat[bad_rows].head(5))
+
+# 如果你已有 mask_ok（比如目标列等规则），把两种掩码都用上
+    mask_good = (~bad_rows)
+    if 'mask_ok' in locals():
+        mask_good = mask_good & mask_ok
+
+# ==== 最终特征矩阵 ====
+    X_full = num_feat.loc[mask_good, :].values
+
+# ==== 若已有 y，也需同步掩码（示例）====
+# y_full = y_series.loc[mask_good].values
+
     X_full_s = x_scaler.transform(X_full)
     with torch.no_grad():
         pred_full = model(torch.tensor(X_full_s, dtype=torch.float32, device=device)).cpu().numpy().reshape(-1)

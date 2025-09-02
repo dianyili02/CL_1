@@ -8,8 +8,84 @@ import torch
 import numpy as np
 
 from pogema import pogema_v0, GridConfig
-from pogema.grid_pathfinding import a_star
-from pogema.animation import AnimationMonitor
+from g2rl.pathfinding import a_star
+
+
+# ===== A* helper (ensure this exists once) =====
+import heapq
+import numpy as np
+from typing import List, Tuple, Dict
+
+Coord = Tuple[int, int]
+
+def _manhattan(a: Coord, b: Coord) -> int:
+    return abs(a[0] - b[0]) + abs(a[1] - b[1])
+
+def a_star(start: Coord, goal: Coord, grid: np.ndarray) -> List[Coord]:
+    if not isinstance(grid, np.ndarray):
+        grid = np.array(grid)
+    H, W = grid.shape[:2]
+
+    def in_bounds(p: Coord) -> bool:
+        return 0 <= p[0] < H and 0 <= p[1] < W
+
+    def passable(p: Coord) -> bool:
+        # 0 = free, 1 = obstacle
+        return in_bounds(p) and (grid[p[0], p[1]] == 0)
+
+    if start == goal:
+        return []
+    if not passable(start) or not passable(goal):
+        return []
+
+    neighbors = [(-1,0),(1,0),(0,-1),(0,1)]
+    open_heap: List[Tuple[int, int, Coord]] = []
+    gscore: Dict[Coord, int] = {start: 0}
+    came_from: Dict[Coord, Coord] = {}
+
+    heapq.heappush(open_heap, (_manhattan(start, goal), 0, start))
+    closed = set()
+
+    while open_heap:
+        f, g, cur = heapq.heappop(open_heap)
+        if cur in closed:
+            continue
+        if cur == goal:
+            path: List[Coord] = []
+            node = cur
+            while node in came_from:
+                path.append(node)
+                node = came_from[node]
+            path.reverse()
+            return path  # excludes start, includes goal
+        closed.add(cur)
+        for dx, dy in neighbors:
+            nb = (cur[0]+dx, cur[1]+dy)
+            if not passable(nb):
+                continue
+            tg = g + 1
+            if tg < gscore.get(nb, 10**9):
+                gscore[nb] = tg
+                came_from[nb] = cur
+                heapq.heappush(open_heap, (tg + _manhattan(nb, goal), tg, nb))
+    return []
+
+# --- Robust import for AnimationMonitor across pogema versions ---
+AnimationMonitor = None
+try:
+    # 新一些版本的写法（如果存在）
+    from pogema.animation import AnimationMonitor  # type: ignore
+except Exception:
+    try:
+        # 你当前的 1.3.1 版本：放在 svg_animation 里
+        from pogema.svg_animation import AnimationMonitor  # type: ignore
+    except Exception:
+        try:
+            # 某些版本可能直接在顶层暴露
+            from pogema import AnimationMonitor  # type: ignore
+        except Exception:
+            AnimationMonitor = None  # 动画不可用，后续判断关闭
+
 
 
 class Grid:
@@ -146,25 +222,115 @@ class G2RLEnv:
         if animation:
             self.env = AnimationMonitor(self.env)
 
-    def _set_global_guidance(self, obs: List[Dict]):
-        # grid = Grid(obs[0]['global_obstacles'])
-        # coords = [[ob['global_xy'], ob['global_target_xy']] for ob in obs]
-        # self.global_guidance = [a_star(st, tg, grid) for st, tg in coords]
+    # def _set_global_guidance(self, obs: List[Dict]):
+    #     # grid = Grid(obs[0]['global_obstacles'])
+    #     # coords = [[ob['global_xy'], ob['global_target_xy']] for ob in obs]
+    #     # self.global_guidance = [a_star(st, tg, grid) for st, tg in coords]
+    #     coords = []
+    #     for ob in obs:
+    #         start = tuple(ob['global_xy'])
+    #         goal = tuple(ob['global_target_xy'])
+    #         coords.append((start, goal))
+
+    # # ✅ 提取 obstacle 网格
+    #     grid_array = self.env.grid.get_obstacles().tolist()
+
+    # # ✅ 使用 numpy 数组传给 a_star
+    #     # print(f"[DEBUG] grid_array type: {type(grid_array)}")           # 应该是 <class 'list'>
+    #     # print(f"[DEBUG] grid_array[0] type: {type(grid_array[0])}")     # 应该是 <class 'list'>
+    #     # print(f"[DEBUG] grid_array shape: {len(grid_array)}x{len(grid_array[0])}")
+
+    #     opt_path = [tuple(state['global_xy'])] + list(env.global_guidance[target_idx])
+
+
+    # def _set_global_guidance(self, obs):
+    # # """
+    # # Build per-agent global guidance using A*.
+    # # - obs: list/dict with keys 'global_xy' and 'global_target_xy' for each agent
+    # # - self.grid / self._grid: binary grid (0 free, 1 obstacle)
+    # # Result:
+    # #   self.global_guidance: List[List[Tuple[int,int]]] for each agent
+    # #   Each path excludes start and includes goal.
+    # # """
+    # # 取出二值栅格
+    #     if hasattr(self, "grid") and self.grid is not None:
+    #         grid_array = np.array(self.grid, dtype=int)
+    #     elif hasattr(self, "_grid") and self._grid is not None:
+    #         grid_array = np.array(self._grid, dtype=int)
+    #     else:
+    #         raise RuntimeError("No grid array found on environment (expected self.grid or self._grid).")
+
+    # # 组装 (start, goal)
+    #     coords = []
+    #     n_agents = getattr(self, "num_agents", None)
+    #     if n_agents is None:
+    #     # 兜底从 obs 推断
+    #         n_agents = len(obs) if hasattr(obs, "__len__") else 1
+
+    #     for i in range(n_agents):
+    #         item = obs[i]
+    #     # 支持两种可能字段名
+    #         s = item.get('global_xy', item.get('xy', None))
+    #         g = item.get('global_target_xy', item.get('target_xy', None))
+    #         if s is None or g is None:
+    #             raise KeyError(f"obs[{i}] missing 'global_xy'/'global_target_xy' (or 'xy'/'target_xy'). Got keys: {list(item.keys())}")
+    #         s = tuple(map(int, s))
+    #         g = tuple(map(int, g))
+    #         coords.append((s, g))
+
+    # # 为每个 agent 计算路径
+    #     guidance = []
+    #     for st, tg in coords:
+    #         path = a_star(st, tg, grid_array)  # [] if unreachable
+    #         guidance.append(path)
+
+    #     self.global_guidance = guidance
+    
+    def _set_global_guidance(self, obs):
+    # """
+    # 使用 pogema 的网格对象构建每个智能体的全局指引（A* 路径）。
+    # - obs: reset() 返回的观测列表，含 'global_xy' 与 'global_target_xy'
+    # - self.env.grid: pogema 的网格对象，get_obstacles() -> 0/1 numpy 数组（0=free,1=obstacle）
+    # 结果：
+    #   self.global_guidance = List[List[Tuple[int,int]]]
+    #   每条路径：不含起点，含终点；若不可达则为空列表。
+    # """
+    # 1) 从 pogema 取二值栅格
+        if hasattr(self, "env") and hasattr(self.env, "grid") and self.env.grid is not None:
+        # get_obstacles() 可能返回 numpy 数组或 list，这里统一成 np.ndarray[int]
+            grid_raw = self.env.grid.get_obstacles()
+            grid_array = np.array(grid_raw, dtype=int)
+        else:
+            raise RuntimeError("pogema env.grid 不存在或未初始化，无法生成全局路径。请确保先调用 self.env.reset()。")
+
+    # 2) 组装 (start, goal)
         coords = []
-        for ob in obs:
-            start = tuple(ob['global_xy'])
-            goal = tuple(ob['global_target_xy'])
-            coords.append((start, goal))
+        n_agents = getattr(self, "num_agents", len(obs) if hasattr(obs, "__len__") else 1)
+        for i in range(n_agents):
+            item = obs[i]
+        # 兼容两种字段名
+            s = item.get('global_xy', item.get('xy', None))
+            g = item.get('global_target_xy', item.get('target_xy', None))
+            if s is None or g is None:
+                raise KeyError(
+                    f"obs[{i}] 缺少 'global_xy'/'global_target_xy' (或 'xy'/'target_xy')。现有键: {list(item.keys())}"
+                )
+            s = tuple(map(int, s))
+            g = tuple(map(int, g))
+            coords.append((s, g))
 
-    # ✅ 提取 obstacle 网格
-        grid_array = self.env.grid.get_obstacles().tolist()
+    # 3) 为每个 agent 计算 A* 路径
+        guidance = []
+        for st, tg in coords:
+            path = a_star(st, tg, grid_array)  # 不可达则返回 []
+            guidance.append(path)
 
-    # ✅ 使用 numpy 数组传给 a_star
-        # print(f"[DEBUG] grid_array type: {type(grid_array)}")           # 应该是 <class 'list'>
-        # print(f"[DEBUG] grid_array[0] type: {type(grid_array[0])}")     # 应该是 <class 'list'>
-        # print(f"[DEBUG] grid_array shape: {len(grid_array)}x{len(grid_array[0])}")
+        self.global_guidance = guidance
 
-        self.global_guidance = [a_star(st, tg, grid_array) for st, tg in coords]
+
+
+
+
 
 
 
@@ -185,7 +351,7 @@ class G2RLEnv:
         self.goals = [ob['global_target_xy'] for ob in self.obs] 
         self.view_cache = []
         for i, (ob, guidance) in enumerate(zip(self.obs, self.global_guidance)):
-            guidance.remove(ob['global_xy'])
+            # guidance.remove(ob['global_xy'])
             view = self._get_local_view(ob, guidance)
             view_cache = [np.zeros_like(view) for _ in range(self.cache_size - 1)] + [view]
             self.view_cache.append(deque(view_cache, self.cache_size))
@@ -200,7 +366,12 @@ class G2RLEnv:
         grid_array = self.env.grid.get_obstacles().tolist()
         self.global_guidance[i] = a_star(ob['global_xy'], ob['global_target_xy'], grid_array)
 
-        self.global_guidance[i].remove(ob['global_xy'])
+        # self.global_guidance[i].remove(ob['global_xy'])
+        cur = (int(ob['global_xy'][0]), int(ob['global_xy'][1]))
+        g = self.global_guidance[i]
+        if g and tuple(g[0]) == cur:  # 仅当首元素就是当前位置时前进一步
+            g.pop(0)
+
 
         view = self._get_local_view(ob, self.global_guidance[i])
         view_cache = [np.zeros_like(view) for _ in range(self.cache_size - 1)] + [view]

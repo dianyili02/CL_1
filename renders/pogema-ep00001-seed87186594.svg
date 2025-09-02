@@ -1,0 +1,836 @@
+<?xml version="1.0" encoding="UTF-8"?>
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+             width="512" height="512" viewBox="0 -6700 6700 6700">
+<defs>
+
+        <rect id="obstacle" width="70" height="70" fill="#84A1AE" rx="15"/>
+        <style>
+        .line {stroke: #84A1AE; stroke-width: 10;}
+        .agent {r: 35;}
+        .target {fill: none; stroke-width: 10; r: 35;}
+        </style>
+        
+</defs>
+
+<line class="line" x1="-50.0" x2="-50.0" y1="0" y2="-6700" />
+<line class="line" x1="50.0" x2="50.0" y1="0" y2="-6700" />
+<line class="line" x1="150.0" x2="150.0" y1="0" y2="-6700" />
+<line class="line" x1="250.0" x2="250.0" y1="0" y2="-6700" />
+<line class="line" x1="350.0" x2="350.0" y1="0" y2="-6700" />
+<line class="line" x1="450.0" x2="450.0" y1="0" y2="-6700" />
+<line class="line" x1="550.0" x2="550.0" y1="0" y2="-6700" />
+<line class="line" x1="650.0" x2="650.0" y1="0" y2="-6700" />
+<line class="line" x1="750.0" x2="750.0" y1="0" y2="-6700" />
+<line class="line" x1="850.0" x2="850.0" y1="0" y2="-6700" />
+<line class="line" x1="950.0" x2="950.0" y1="0" y2="-6700" />
+<line class="line" x1="1050.0" x2="1050.0" y1="0" y2="-6700" />
+<line class="line" x1="1150.0" x2="1150.0" y1="0" y2="-6700" />
+<line class="line" x1="1250.0" x2="1250.0" y1="0" y2="-6700" />
+<line class="line" x1="1350.0" x2="1350.0" y1="0" y2="-6700" />
+<line class="line" x1="1450.0" x2="1450.0" y1="0" y2="-6700" />
+<line class="line" x1="1550.0" x2="1550.0" y1="0" y2="-6700" />
+<line class="line" x1="1650.0" x2="1650.0" y1="0" y2="-6700" />
+<line class="line" x1="1750.0" x2="1750.0" y1="0" y2="-6700" />
+<line class="line" x1="1850.0" x2="1850.0" y1="0" y2="-6700" />
+<line class="line" x1="1950.0" x2="1950.0" y1="0" y2="-6700" />
+<line class="line" x1="2050.0" x2="2050.0" y1="0" y2="-6700" />
+<line class="line" x1="2150.0" x2="2150.0" y1="0" y2="-6700" />
+<line class="line" x1="2250.0" x2="2250.0" y1="0" y2="-6700" />
+<line class="line" x1="2350.0" x2="2350.0" y1="0" y2="-6700" />
+<line class="line" x1="2450.0" x2="2450.0" y1="0" y2="-6700" />
+<line class="line" x1="2550.0" x2="2550.0" y1="0" y2="-6700" />
+<line class="line" x1="2650.0" x2="2650.0" y1="0" y2="-6700" />
+<line class="line" x1="2750.0" x2="2750.0" y1="0" y2="-6700" />
+<line class="line" x1="2850.0" x2="2850.0" y1="0" y2="-6700" />
+<line class="line" x1="2950.0" x2="2950.0" y1="0" y2="-6700" />
+<line class="line" x1="3050.0" x2="3050.0" y1="0" y2="-6700" />
+<line class="line" x1="3150.0" x2="3150.0" y1="0" y2="-6700" />
+<line class="line" x1="3250.0" x2="3250.0" y1="0" y2="-6700" />
+<line class="line" x1="3350.0" x2="3350.0" y1="0" y2="-6700" />
+<line class="line" x1="3450.0" x2="3450.0" y1="0" y2="-6700" />
+<line class="line" x1="3550.0" x2="3550.0" y1="0" y2="-6700" />
+<line class="line" x1="3650.0" x2="3650.0" y1="0" y2="-6700" />
+<line class="line" x1="3750.0" x2="3750.0" y1="0" y2="-6700" />
+<line class="line" x1="3850.0" x2="3850.0" y1="0" y2="-6700" />
+<line class="line" x1="3950.0" x2="3950.0" y1="0" y2="-6700" />
+<line class="line" x1="4050.0" x2="4050.0" y1="0" y2="-6700" />
+<line class="line" x1="4150.0" x2="4150.0" y1="0" y2="-6700" />
+<line class="line" x1="4250.0" x2="4250.0" y1="0" y2="-6700" />
+<line class="line" x1="4350.0" x2="4350.0" y1="0" y2="-6700" />
+<line class="line" x1="4450.0" x2="4450.0" y1="0" y2="-6700" />
+<line class="line" x1="4550.0" x2="4550.0" y1="0" y2="-6700" />
+<line class="line" x1="4650.0" x2="4650.0" y1="0" y2="-6700" />
+<line class="line" x1="4750.0" x2="4750.0" y1="0" y2="-6700" />
+<line class="line" x1="4850.0" x2="4850.0" y1="0" y2="-6700" />
+<line class="line" x1="4950.0" x2="4950.0" y1="0" y2="-6700" />
+<line class="line" x1="5050.0" x2="5050.0" y1="0" y2="-6700" />
+<line class="line" x1="5150.0" x2="5150.0" y1="0" y2="-6700" />
+<line class="line" x1="5250.0" x2="5250.0" y1="0" y2="-6700" />
+<line class="line" x1="5350.0" x2="5350.0" y1="0" y2="-6700" />
+<line class="line" x1="5450.0" x2="5450.0" y1="0" y2="-6700" />
+<line class="line" x1="5550.0" x2="5550.0" y1="0" y2="-6700" />
+<line class="line" x1="5650.0" x2="5650.0" y1="0" y2="-6700" />
+<line class="line" x1="5750.0" x2="5750.0" y1="0" y2="-6700" />
+<line class="line" x1="5850.0" x2="5850.0" y1="0" y2="-6700" />
+<line class="line" x1="5950.0" x2="5950.0" y1="0" y2="-6700" />
+<line class="line" x1="6050.0" x2="6050.0" y1="0" y2="-6700" />
+<line class="line" x1="6150.0" x2="6150.0" y1="0" y2="-6700" />
+<line class="line" x1="6250.0" x2="6250.0" y1="0" y2="-6700" />
+<line class="line" x1="6350.0" x2="6350.0" y1="0" y2="-6700" />
+<line class="line" x1="6450.0" x2="6450.0" y1="0" y2="-6700" />
+<line class="line" x1="6550.0" x2="6550.0" y1="0" y2="-6700" />
+<line class="line" x1="6650.0" x2="6650.0" y1="0" y2="-6700" />
+<line class="line" x1="0" x2="6700" y1="50.0" y2="50.0" />
+<line class="line" x1="0" x2="6700" y1="-50.0" y2="-50.0" />
+<line class="line" x1="0" x2="6700" y1="-150.0" y2="-150.0" />
+<line class="line" x1="0" x2="6700" y1="-250.0" y2="-250.0" />
+<line class="line" x1="0" x2="6700" y1="-350.0" y2="-350.0" />
+<line class="line" x1="0" x2="6700" y1="-450.0" y2="-450.0" />
+<line class="line" x1="0" x2="6700" y1="-550.0" y2="-550.0" />
+<line class="line" x1="0" x2="6700" y1="-650.0" y2="-650.0" />
+<line class="line" x1="0" x2="6700" y1="-750.0" y2="-750.0" />
+<line class="line" x1="0" x2="6700" y1="-850.0" y2="-850.0" />
+<line class="line" x1="0" x2="6700" y1="-950.0" y2="-950.0" />
+<line class="line" x1="0" x2="6700" y1="-1050.0" y2="-1050.0" />
+<line class="line" x1="0" x2="6700" y1="-1150.0" y2="-1150.0" />
+<line class="line" x1="0" x2="6700" y1="-1250.0" y2="-1250.0" />
+<line class="line" x1="0" x2="6700" y1="-1350.0" y2="-1350.0" />
+<line class="line" x1="0" x2="6700" y1="-1450.0" y2="-1450.0" />
+<line class="line" x1="0" x2="6700" y1="-1550.0" y2="-1550.0" />
+<line class="line" x1="0" x2="6700" y1="-1650.0" y2="-1650.0" />
+<line class="line" x1="0" x2="6700" y1="-1750.0" y2="-1750.0" />
+<line class="line" x1="0" x2="6700" y1="-1850.0" y2="-1850.0" />
+<line class="line" x1="0" x2="6700" y1="-1950.0" y2="-1950.0" />
+<line class="line" x1="0" x2="6700" y1="-2050.0" y2="-2050.0" />
+<line class="line" x1="0" x2="6700" y1="-2150.0" y2="-2150.0" />
+<line class="line" x1="0" x2="6700" y1="-2250.0" y2="-2250.0" />
+<line class="line" x1="0" x2="6700" y1="-2350.0" y2="-2350.0" />
+<line class="line" x1="0" x2="6700" y1="-2450.0" y2="-2450.0" />
+<line class="line" x1="0" x2="6700" y1="-2550.0" y2="-2550.0" />
+<line class="line" x1="0" x2="6700" y1="-2650.0" y2="-2650.0" />
+<line class="line" x1="0" x2="6700" y1="-2750.0" y2="-2750.0" />
+<line class="line" x1="0" x2="6700" y1="-2850.0" y2="-2850.0" />
+<line class="line" x1="0" x2="6700" y1="-2950.0" y2="-2950.0" />
+<line class="line" x1="0" x2="6700" y1="-3050.0" y2="-3050.0" />
+<line class="line" x1="0" x2="6700" y1="-3150.0" y2="-3150.0" />
+<line class="line" x1="0" x2="6700" y1="-3250.0" y2="-3250.0" />
+<line class="line" x1="0" x2="6700" y1="-3350.0" y2="-3350.0" />
+<line class="line" x1="0" x2="6700" y1="-3450.0" y2="-3450.0" />
+<line class="line" x1="0" x2="6700" y1="-3550.0" y2="-3550.0" />
+<line class="line" x1="0" x2="6700" y1="-3650.0" y2="-3650.0" />
+<line class="line" x1="0" x2="6700" y1="-3750.0" y2="-3750.0" />
+<line class="line" x1="0" x2="6700" y1="-3850.0" y2="-3850.0" />
+<line class="line" x1="0" x2="6700" y1="-3950.0" y2="-3950.0" />
+<line class="line" x1="0" x2="6700" y1="-4050.0" y2="-4050.0" />
+<line class="line" x1="0" x2="6700" y1="-4150.0" y2="-4150.0" />
+<line class="line" x1="0" x2="6700" y1="-4250.0" y2="-4250.0" />
+<line class="line" x1="0" x2="6700" y1="-4350.0" y2="-4350.0" />
+<line class="line" x1="0" x2="6700" y1="-4450.0" y2="-4450.0" />
+<line class="line" x1="0" x2="6700" y1="-4550.0" y2="-4550.0" />
+<line class="line" x1="0" x2="6700" y1="-4650.0" y2="-4650.0" />
+<line class="line" x1="0" x2="6700" y1="-4750.0" y2="-4750.0" />
+<line class="line" x1="0" x2="6700" y1="-4850.0" y2="-4850.0" />
+<line class="line" x1="0" x2="6700" y1="-4950.0" y2="-4950.0" />
+<line class="line" x1="0" x2="6700" y1="-5050.0" y2="-5050.0" />
+<line class="line" x1="0" x2="6700" y1="-5150.0" y2="-5150.0" />
+<line class="line" x1="0" x2="6700" y1="-5250.0" y2="-5250.0" />
+<line class="line" x1="0" x2="6700" y1="-5350.0" y2="-5350.0" />
+<line class="line" x1="0" x2="6700" y1="-5450.0" y2="-5450.0" />
+<line class="line" x1="0" x2="6700" y1="-5550.0" y2="-5550.0" />
+<line class="line" x1="0" x2="6700" y1="-5650.0" y2="-5650.0" />
+<line class="line" x1="0" x2="6700" y1="-5750.0" y2="-5750.0" />
+<line class="line" x1="0" x2="6700" y1="-5850.0" y2="-5850.0" />
+<line class="line" x1="0" x2="6700" y1="-5950.0" y2="-5950.0" />
+<line class="line" x1="0" x2="6700" y1="-6050.0" y2="-6050.0" />
+<line class="line" x1="0" x2="6700" y1="-6150.0" y2="-6150.0" />
+<line class="line" x1="0" x2="6700" y1="-6250.0" y2="-6250.0" />
+<line class="line" x1="0" x2="6700" y1="-6350.0" y2="-6350.0" />
+<line class="line" x1="0" x2="6700" y1="-6450.0" y2="-6450.0" />
+<line class="line" x1="0" x2="6700" y1="-6550.0" y2="-6550.0" />
+<line class="line" x1="0" x2="6700" y1="-6650.0" y2="-6650.0" />
+<use href="#obstacle" x="65" y="-135" />
+<use href="#obstacle" x="65" y="-235" />
+<use href="#obstacle" x="65" y="-335" />
+<use href="#obstacle" x="65" y="-435" />
+<use href="#obstacle" x="65" y="-535" />
+<use href="#obstacle" x="65" y="-635" />
+<use href="#obstacle" x="65" y="-735" />
+<use href="#obstacle" x="65" y="-835" />
+<use href="#obstacle" x="65" y="-935" />
+<use href="#obstacle" x="65" y="-1035" />
+<use href="#obstacle" x="65" y="-1135" />
+<use href="#obstacle" x="65" y="-1235" />
+<use href="#obstacle" x="65" y="-1335" />
+<use href="#obstacle" x="65" y="-1435" />
+<use href="#obstacle" x="65" y="-1535" />
+<use href="#obstacle" x="65" y="-1635" />
+<use href="#obstacle" x="65" y="-1735" />
+<use href="#obstacle" x="65" y="-1835" />
+<use href="#obstacle" x="65" y="-1935" />
+<use href="#obstacle" x="65" y="-2035" />
+<use href="#obstacle" x="65" y="-2135" />
+<use href="#obstacle" x="65" y="-2235" />
+<use href="#obstacle" x="65" y="-2335" />
+<use href="#obstacle" x="65" y="-2435" />
+<use href="#obstacle" x="65" y="-2535" />
+<use href="#obstacle" x="65" y="-2635" />
+<use href="#obstacle" x="65" y="-2735" />
+<use href="#obstacle" x="65" y="-2835" />
+<use href="#obstacle" x="65" y="-2935" />
+<use href="#obstacle" x="65" y="-3035" />
+<use href="#obstacle" x="65" y="-3135" />
+<use href="#obstacle" x="65" y="-3235" />
+<use href="#obstacle" x="65" y="-3335" />
+<use href="#obstacle" x="65" y="-3435" />
+<use href="#obstacle" x="65" y="-3535" />
+<use href="#obstacle" x="65" y="-3635" />
+<use href="#obstacle" x="65" y="-3735" />
+<use href="#obstacle" x="65" y="-3835" />
+<use href="#obstacle" x="65" y="-3935" />
+<use href="#obstacle" x="65" y="-4035" />
+<use href="#obstacle" x="65" y="-4135" />
+<use href="#obstacle" x="65" y="-4235" />
+<use href="#obstacle" x="65" y="-4335" />
+<use href="#obstacle" x="65" y="-4435" />
+<use href="#obstacle" x="65" y="-4535" />
+<use href="#obstacle" x="65" y="-4635" />
+<use href="#obstacle" x="65" y="-4735" />
+<use href="#obstacle" x="65" y="-4835" />
+<use href="#obstacle" x="65" y="-4935" />
+<use href="#obstacle" x="65" y="-5035" />
+<use href="#obstacle" x="65" y="-5135" />
+<use href="#obstacle" x="65" y="-5235" />
+<use href="#obstacle" x="65" y="-5335" />
+<use href="#obstacle" x="65" y="-5435" />
+<use href="#obstacle" x="65" y="-5535" />
+<use href="#obstacle" x="65" y="-5635" />
+<use href="#obstacle" x="65" y="-5735" />
+<use href="#obstacle" x="65" y="-5835" />
+<use href="#obstacle" x="65" y="-5935" />
+<use href="#obstacle" x="65" y="-6035" />
+<use href="#obstacle" x="65" y="-6135" />
+<use href="#obstacle" x="65" y="-6235" />
+<use href="#obstacle" x="65" y="-6335" />
+<use href="#obstacle" x="65" y="-6435" />
+<use href="#obstacle" x="65" y="-6535" />
+<use href="#obstacle" x="65" y="-6635" />
+<use href="#obstacle" x="165" y="-135" />
+<use href="#obstacle" x="165" y="-1035" />
+<use href="#obstacle" x="165" y="-1935" />
+<use href="#obstacle" x="165" y="-2535" />
+<use href="#obstacle" x="165" y="-2835" />
+<use href="#obstacle" x="165" y="-4135" />
+<use href="#obstacle" x="165" y="-4235" />
+<use href="#obstacle" x="165" y="-4935" />
+<use href="#obstacle" x="165" y="-5635" />
+<use href="#obstacle" x="165" y="-5735" />
+<use href="#obstacle" x="165" y="-6435" />
+<use href="#obstacle" x="165" y="-6635" />
+<use href="#obstacle" x="265" y="-135" />
+<use href="#obstacle" x="265" y="-1235" />
+<use href="#obstacle" x="265" y="-4135" />
+<use href="#obstacle" x="265" y="-4735" />
+<use href="#obstacle" x="265" y="-4835" />
+<use href="#obstacle" x="265" y="-6335" />
+<use href="#obstacle" x="265" y="-6535" />
+<use href="#obstacle" x="265" y="-6635" />
+<use href="#obstacle" x="365" y="-135" />
+<use href="#obstacle" x="365" y="-935" />
+<use href="#obstacle" x="365" y="-1735" />
+<use href="#obstacle" x="365" y="-2935" />
+<use href="#obstacle" x="365" y="-3035" />
+<use href="#obstacle" x="365" y="-5135" />
+<use href="#obstacle" x="365" y="-5935" />
+<use href="#obstacle" x="365" y="-6535" />
+<use href="#obstacle" x="365" y="-6635" />
+<use href="#obstacle" x="465" y="-135" />
+<use href="#obstacle" x="465" y="-1635" />
+<use href="#obstacle" x="465" y="-4035" />
+<use href="#obstacle" x="465" y="-4335" />
+<use href="#obstacle" x="465" y="-4835" />
+<use href="#obstacle" x="465" y="-5735" />
+<use href="#obstacle" x="465" y="-6235" />
+<use href="#obstacle" x="465" y="-6635" />
+<use href="#obstacle" x="565" y="-135" />
+<use href="#obstacle" x="565" y="-2135" />
+<use href="#obstacle" x="565" y="-2935" />
+<use href="#obstacle" x="565" y="-3835" />
+<use href="#obstacle" x="565" y="-4135" />
+<use href="#obstacle" x="565" y="-5335" />
+<use href="#obstacle" x="565" y="-6435" />
+<use href="#obstacle" x="565" y="-6635" />
+<use href="#obstacle" x="665" y="-135" />
+<use href="#obstacle" x="665" y="-1035" />
+<use href="#obstacle" x="665" y="-2735" />
+<use href="#obstacle" x="665" y="-2835" />
+<use href="#obstacle" x="665" y="-3635" />
+<use href="#obstacle" x="665" y="-3835" />
+<use href="#obstacle" x="665" y="-5235" />
+<use href="#obstacle" x="665" y="-5435" />
+<use href="#obstacle" x="665" y="-6035" />
+<use href="#obstacle" x="665" y="-6535" />
+<use href="#obstacle" x="665" y="-6635" />
+<use href="#obstacle" x="765" y="-135" />
+<use href="#obstacle" x="765" y="-735" />
+<use href="#obstacle" x="765" y="-3835" />
+<use href="#obstacle" x="765" y="-4435" />
+<use href="#obstacle" x="765" y="-4835" />
+<use href="#obstacle" x="765" y="-5135" />
+<use href="#obstacle" x="765" y="-6635" />
+<use href="#obstacle" x="865" y="-135" />
+<use href="#obstacle" x="865" y="-2335" />
+<use href="#obstacle" x="865" y="-2735" />
+<use href="#obstacle" x="865" y="-3835" />
+<use href="#obstacle" x="865" y="-4435" />
+<use href="#obstacle" x="865" y="-6435" />
+<use href="#obstacle" x="865" y="-6635" />
+<use href="#obstacle" x="965" y="-135" />
+<use href="#obstacle" x="965" y="-2335" />
+<use href="#obstacle" x="965" y="-4335" />
+<use href="#obstacle" x="965" y="-6635" />
+<use href="#obstacle" x="1065" y="-135" />
+<use href="#obstacle" x="1065" y="-1535" />
+<use href="#obstacle" x="1065" y="-2835" />
+<use href="#obstacle" x="1065" y="-3035" />
+<use href="#obstacle" x="1065" y="-3735" />
+<use href="#obstacle" x="1065" y="-4335" />
+<use href="#obstacle" x="1065" y="-4635" />
+<use href="#obstacle" x="1065" y="-5235" />
+<use href="#obstacle" x="1065" y="-5535" />
+<use href="#obstacle" x="1065" y="-6635" />
+<use href="#obstacle" x="1165" y="-135" />
+<use href="#obstacle" x="1165" y="-1635" />
+<use href="#obstacle" x="1165" y="-1935" />
+<use href="#obstacle" x="1165" y="-2635" />
+<use href="#obstacle" x="1165" y="-3535" />
+<use href="#obstacle" x="1165" y="-4035" />
+<use href="#obstacle" x="1165" y="-4535" />
+<use href="#obstacle" x="1165" y="-4835" />
+<use href="#obstacle" x="1165" y="-6635" />
+<use href="#obstacle" x="1265" y="-135" />
+<use href="#obstacle" x="1265" y="-1635" />
+<use href="#obstacle" x="1265" y="-2635" />
+<use href="#obstacle" x="1265" y="-2735" />
+<use href="#obstacle" x="1265" y="-3835" />
+<use href="#obstacle" x="1265" y="-5835" />
+<use href="#obstacle" x="1265" y="-5935" />
+<use href="#obstacle" x="1265" y="-6235" />
+<use href="#obstacle" x="1265" y="-6435" />
+<use href="#obstacle" x="1265" y="-6635" />
+<use href="#obstacle" x="1365" y="-135" />
+<use href="#obstacle" x="1365" y="-1535" />
+<use href="#obstacle" x="1365" y="-2535" />
+<use href="#obstacle" x="1365" y="-3435" />
+<use href="#obstacle" x="1365" y="-4135" />
+<use href="#obstacle" x="1365" y="-6535" />
+<use href="#obstacle" x="1365" y="-6635" />
+<use href="#obstacle" x="1465" y="-135" />
+<use href="#obstacle" x="1465" y="-1035" />
+<use href="#obstacle" x="1465" y="-3035" />
+<use href="#obstacle" x="1465" y="-3135" />
+<use href="#obstacle" x="1465" y="-5035" />
+<use href="#obstacle" x="1465" y="-5435" />
+<use href="#obstacle" x="1465" y="-6635" />
+<use href="#obstacle" x="1565" y="-135" />
+<use href="#obstacle" x="1565" y="-935" />
+<use href="#obstacle" x="1565" y="-1135" />
+<use href="#obstacle" x="1565" y="-1735" />
+<use href="#obstacle" x="1565" y="-2035" />
+<use href="#obstacle" x="1565" y="-3235" />
+<use href="#obstacle" x="1565" y="-4935" />
+<use href="#obstacle" x="1565" y="-5535" />
+<use href="#obstacle" x="1565" y="-6235" />
+<use href="#obstacle" x="1565" y="-6635" />
+<use href="#obstacle" x="1665" y="-135" />
+<use href="#obstacle" x="1665" y="-1935" />
+<use href="#obstacle" x="1665" y="-2235" />
+<use href="#obstacle" x="1665" y="-2935" />
+<use href="#obstacle" x="1665" y="-4835" />
+<use href="#obstacle" x="1665" y="-5935" />
+<use href="#obstacle" x="1665" y="-6635" />
+<use href="#obstacle" x="1765" y="-135" />
+<use href="#obstacle" x="1765" y="-335" />
+<use href="#obstacle" x="1765" y="-2035" />
+<use href="#obstacle" x="1765" y="-4635" />
+<use href="#obstacle" x="1765" y="-6435" />
+<use href="#obstacle" x="1765" y="-6635" />
+<use href="#obstacle" x="1865" y="-135" />
+<use href="#obstacle" x="1865" y="-435" />
+<use href="#obstacle" x="1865" y="-735" />
+<use href="#obstacle" x="1865" y="-1135" />
+<use href="#obstacle" x="1865" y="-3135" />
+<use href="#obstacle" x="1865" y="-4135" />
+<use href="#obstacle" x="1865" y="-4235" />
+<use href="#obstacle" x="1865" y="-5635" />
+<use href="#obstacle" x="1865" y="-6435" />
+<use href="#obstacle" x="1865" y="-6635" />
+<use href="#obstacle" x="1965" y="-135" />
+<use href="#obstacle" x="1965" y="-535" />
+<use href="#obstacle" x="1965" y="-735" />
+<use href="#obstacle" x="1965" y="-1635" />
+<use href="#obstacle" x="1965" y="-1735" />
+<use href="#obstacle" x="1965" y="-2635" />
+<use href="#obstacle" x="1965" y="-3035" />
+<use href="#obstacle" x="1965" y="-3235" />
+<use href="#obstacle" x="1965" y="-4635" />
+<use href="#obstacle" x="1965" y="-4835" />
+<use href="#obstacle" x="1965" y="-5835" />
+<use href="#obstacle" x="1965" y="-6635" />
+<use href="#obstacle" x="2065" y="-135" />
+<use href="#obstacle" x="2065" y="-2135" />
+<use href="#obstacle" x="2065" y="-2635" />
+<use href="#obstacle" x="2065" y="-3135" />
+<use href="#obstacle" x="2065" y="-5235" />
+<use href="#obstacle" x="2065" y="-5735" />
+<use href="#obstacle" x="2065" y="-6235" />
+<use href="#obstacle" x="2065" y="-6635" />
+<use href="#obstacle" x="2165" y="-135" />
+<use href="#obstacle" x="2165" y="-535" />
+<use href="#obstacle" x="2165" y="-3535" />
+<use href="#obstacle" x="2165" y="-4235" />
+<use href="#obstacle" x="2165" y="-6135" />
+<use href="#obstacle" x="2165" y="-6635" />
+<use href="#obstacle" x="2265" y="-135" />
+<use href="#obstacle" x="2265" y="-435" />
+<use href="#obstacle" x="2265" y="-1335" />
+<use href="#obstacle" x="2265" y="-2335" />
+<use href="#obstacle" x="2265" y="-3835" />
+<use href="#obstacle" x="2265" y="-4335" />
+<use href="#obstacle" x="2265" y="-6635" />
+<use href="#obstacle" x="2365" y="-135" />
+<use href="#obstacle" x="2365" y="-735" />
+<use href="#obstacle" x="2365" y="-1735" />
+<use href="#obstacle" x="2365" y="-3135" />
+<use href="#obstacle" x="2365" y="-3535" />
+<use href="#obstacle" x="2365" y="-5235" />
+<use href="#obstacle" x="2365" y="-6435" />
+<use href="#obstacle" x="2365" y="-6635" />
+<use href="#obstacle" x="2465" y="-135" />
+<use href="#obstacle" x="2465" y="-435" />
+<use href="#obstacle" x="2465" y="-1735" />
+<use href="#obstacle" x="2465" y="-2635" />
+<use href="#obstacle" x="2465" y="-2735" />
+<use href="#obstacle" x="2465" y="-3735" />
+<use href="#obstacle" x="2465" y="-4435" />
+<use href="#obstacle" x="2465" y="-6335" />
+<use href="#obstacle" x="2465" y="-6635" />
+<use href="#obstacle" x="2565" y="-135" />
+<use href="#obstacle" x="2565" y="-1235" />
+<use href="#obstacle" x="2565" y="-2035" />
+<use href="#obstacle" x="2565" y="-2435" />
+<use href="#obstacle" x="2565" y="-3735" />
+<use href="#obstacle" x="2565" y="-4035" />
+<use href="#obstacle" x="2565" y="-4535" />
+<use href="#obstacle" x="2565" y="-4635" />
+<use href="#obstacle" x="2565" y="-4935" />
+<use href="#obstacle" x="2565" y="-6635" />
+<use href="#obstacle" x="2665" y="-135" />
+<use href="#obstacle" x="2665" y="-435" />
+<use href="#obstacle" x="2665" y="-835" />
+<use href="#obstacle" x="2665" y="-2035" />
+<use href="#obstacle" x="2665" y="-3535" />
+<use href="#obstacle" x="2665" y="-3735" />
+<use href="#obstacle" x="2665" y="-6635" />
+<use href="#obstacle" x="2765" y="-135" />
+<use href="#obstacle" x="2765" y="-935" />
+<use href="#obstacle" x="2765" y="-1935" />
+<use href="#obstacle" x="2765" y="-2135" />
+<use href="#obstacle" x="2765" y="-2535" />
+<use href="#obstacle" x="2765" y="-3035" />
+<use href="#obstacle" x="2765" y="-5935" />
+<use href="#obstacle" x="2765" y="-6635" />
+<use href="#obstacle" x="2865" y="-135" />
+<use href="#obstacle" x="2865" y="-1035" />
+<use href="#obstacle" x="2865" y="-2435" />
+<use href="#obstacle" x="2865" y="-3235" />
+<use href="#obstacle" x="2865" y="-4635" />
+<use href="#obstacle" x="2865" y="-5935" />
+<use href="#obstacle" x="2865" y="-6035" />
+<use href="#obstacle" x="2865" y="-6635" />
+<use href="#obstacle" x="2965" y="-135" />
+<use href="#obstacle" x="2965" y="-435" />
+<use href="#obstacle" x="2965" y="-835" />
+<use href="#obstacle" x="2965" y="-1835" />
+<use href="#obstacle" x="2965" y="-2435" />
+<use href="#obstacle" x="2965" y="-3935" />
+<use href="#obstacle" x="2965" y="-4235" />
+<use href="#obstacle" x="2965" y="-6635" />
+<use href="#obstacle" x="3065" y="-135" />
+<use href="#obstacle" x="3065" y="-2335" />
+<use href="#obstacle" x="3065" y="-3035" />
+<use href="#obstacle" x="3065" y="-3135" />
+<use href="#obstacle" x="3065" y="-4635" />
+<use href="#obstacle" x="3065" y="-5035" />
+<use href="#obstacle" x="3065" y="-5135" />
+<use href="#obstacle" x="3065" y="-5835" />
+<use href="#obstacle" x="3065" y="-6635" />
+<use href="#obstacle" x="3165" y="-135" />
+<use href="#obstacle" x="3165" y="-335" />
+<use href="#obstacle" x="3165" y="-1235" />
+<use href="#obstacle" x="3165" y="-2235" />
+<use href="#obstacle" x="3165" y="-3235" />
+<use href="#obstacle" x="3165" y="-3835" />
+<use href="#obstacle" x="3165" y="-3935" />
+<use href="#obstacle" x="3165" y="-5035" />
+<use href="#obstacle" x="3165" y="-6635" />
+<use href="#obstacle" x="3265" y="-135" />
+<use href="#obstacle" x="3265" y="-835" />
+<use href="#obstacle" x="3265" y="-3935" />
+<use href="#obstacle" x="3265" y="-4835" />
+<use href="#obstacle" x="3265" y="-5335" />
+<use href="#obstacle" x="3265" y="-5735" />
+<use href="#obstacle" x="3265" y="-6635" />
+<use href="#obstacle" x="3365" y="-135" />
+<use href="#obstacle" x="3365" y="-635" />
+<use href="#obstacle" x="3365" y="-1035" />
+<use href="#obstacle" x="3365" y="-1335" />
+<use href="#obstacle" x="3365" y="-4135" />
+<use href="#obstacle" x="3365" y="-4535" />
+<use href="#obstacle" x="3365" y="-5035" />
+<use href="#obstacle" x="3365" y="-5535" />
+<use href="#obstacle" x="3365" y="-5635" />
+<use href="#obstacle" x="3365" y="-6635" />
+<use href="#obstacle" x="3465" y="-135" />
+<use href="#obstacle" x="3465" y="-1135" />
+<use href="#obstacle" x="3465" y="-1335" />
+<use href="#obstacle" x="3465" y="-3035" />
+<use href="#obstacle" x="3465" y="-4335" />
+<use href="#obstacle" x="3465" y="-4735" />
+<use href="#obstacle" x="3465" y="-6035" />
+<use href="#obstacle" x="3465" y="-6135" />
+<use href="#obstacle" x="3465" y="-6435" />
+<use href="#obstacle" x="3465" y="-6635" />
+<use href="#obstacle" x="3565" y="-135" />
+<use href="#obstacle" x="3565" y="-435" />
+<use href="#obstacle" x="3565" y="-1135" />
+<use href="#obstacle" x="3565" y="-2135" />
+<use href="#obstacle" x="3565" y="-2835" />
+<use href="#obstacle" x="3565" y="-4435" />
+<use href="#obstacle" x="3565" y="-4635" />
+<use href="#obstacle" x="3565" y="-4835" />
+<use href="#obstacle" x="3565" y="-4935" />
+<use href="#obstacle" x="3565" y="-5235" />
+<use href="#obstacle" x="3565" y="-6635" />
+<use href="#obstacle" x="3665" y="-135" />
+<use href="#obstacle" x="3665" y="-235" />
+<use href="#obstacle" x="3665" y="-335" />
+<use href="#obstacle" x="3665" y="-1135" />
+<use href="#obstacle" x="3665" y="-2235" />
+<use href="#obstacle" x="3665" y="-6435" />
+<use href="#obstacle" x="3665" y="-6635" />
+<use href="#obstacle" x="3765" y="-135" />
+<use href="#obstacle" x="3765" y="-735" />
+<use href="#obstacle" x="3765" y="-2035" />
+<use href="#obstacle" x="3765" y="-4435" />
+<use href="#obstacle" x="3765" y="-6635" />
+<use href="#obstacle" x="3865" y="-135" />
+<use href="#obstacle" x="3865" y="-335" />
+<use href="#obstacle" x="3865" y="-1935" />
+<use href="#obstacle" x="3865" y="-6635" />
+<use href="#obstacle" x="3965" y="-135" />
+<use href="#obstacle" x="3965" y="-1635" />
+<use href="#obstacle" x="3965" y="-1935" />
+<use href="#obstacle" x="3965" y="-3835" />
+<use href="#obstacle" x="3965" y="-5935" />
+<use href="#obstacle" x="3965" y="-6335" />
+<use href="#obstacle" x="3965" y="-6635" />
+<use href="#obstacle" x="4065" y="-135" />
+<use href="#obstacle" x="4065" y="-1435" />
+<use href="#obstacle" x="4065" y="-2035" />
+<use href="#obstacle" x="4065" y="-2335" />
+<use href="#obstacle" x="4065" y="-5535" />
+<use href="#obstacle" x="4065" y="-6635" />
+<use href="#obstacle" x="4165" y="-135" />
+<use href="#obstacle" x="4165" y="-835" />
+<use href="#obstacle" x="4165" y="-935" />
+<use href="#obstacle" x="4165" y="-1035" />
+<use href="#obstacle" x="4165" y="-1235" />
+<use href="#obstacle" x="4165" y="-2135" />
+<use href="#obstacle" x="4165" y="-3735" />
+<use href="#obstacle" x="4165" y="-5835" />
+<use href="#obstacle" x="4165" y="-6035" />
+<use href="#obstacle" x="4165" y="-6235" />
+<use href="#obstacle" x="4165" y="-6335" />
+<use href="#obstacle" x="4165" y="-6635" />
+<use href="#obstacle" x="4265" y="-135" />
+<use href="#obstacle" x="4265" y="-1835" />
+<use href="#obstacle" x="4265" y="-2235" />
+<use href="#obstacle" x="4265" y="-4435" />
+<use href="#obstacle" x="4265" y="-4535" />
+<use href="#obstacle" x="4265" y="-6335" />
+<use href="#obstacle" x="4265" y="-6635" />
+<use href="#obstacle" x="4365" y="-135" />
+<use href="#obstacle" x="4365" y="-935" />
+<use href="#obstacle" x="4365" y="-1135" />
+<use href="#obstacle" x="4365" y="-1335" />
+<use href="#obstacle" x="4365" y="-3835" />
+<use href="#obstacle" x="4365" y="-4335" />
+<use href="#obstacle" x="4365" y="-4435" />
+<use href="#obstacle" x="4365" y="-5235" />
+<use href="#obstacle" x="4365" y="-5535" />
+<use href="#obstacle" x="4365" y="-6635" />
+<use href="#obstacle" x="4465" y="-135" />
+<use href="#obstacle" x="4465" y="-335" />
+<use href="#obstacle" x="4465" y="-735" />
+<use href="#obstacle" x="4465" y="-935" />
+<use href="#obstacle" x="4465" y="-1835" />
+<use href="#obstacle" x="4465" y="-2635" />
+<use href="#obstacle" x="4465" y="-4535" />
+<use href="#obstacle" x="4465" y="-5035" />
+<use href="#obstacle" x="4465" y="-6135" />
+<use href="#obstacle" x="4465" y="-6635" />
+<use href="#obstacle" x="4565" y="-135" />
+<use href="#obstacle" x="4565" y="-335" />
+<use href="#obstacle" x="4565" y="-835" />
+<use href="#obstacle" x="4565" y="-2335" />
+<use href="#obstacle" x="4565" y="-2435" />
+<use href="#obstacle" x="4565" y="-3335" />
+<use href="#obstacle" x="4565" y="-3435" />
+<use href="#obstacle" x="4565" y="-5535" />
+<use href="#obstacle" x="4565" y="-6635" />
+<use href="#obstacle" x="4665" y="-135" />
+<use href="#obstacle" x="4665" y="-535" />
+<use href="#obstacle" x="4665" y="-635" />
+<use href="#obstacle" x="4665" y="-735" />
+<use href="#obstacle" x="4665" y="-1135" />
+<use href="#obstacle" x="4665" y="-1335" />
+<use href="#obstacle" x="4665" y="-3135" />
+<use href="#obstacle" x="4665" y="-3235" />
+<use href="#obstacle" x="4665" y="-4635" />
+<use href="#obstacle" x="4665" y="-4835" />
+<use href="#obstacle" x="4665" y="-5635" />
+<use href="#obstacle" x="4665" y="-6335" />
+<use href="#obstacle" x="4665" y="-6635" />
+<use href="#obstacle" x="4765" y="-135" />
+<use href="#obstacle" x="4765" y="-735" />
+<use href="#obstacle" x="4765" y="-1035" />
+<use href="#obstacle" x="4765" y="-1635" />
+<use href="#obstacle" x="4765" y="-3435" />
+<use href="#obstacle" x="4765" y="-4735" />
+<use href="#obstacle" x="4765" y="-5335" />
+<use href="#obstacle" x="4765" y="-5535" />
+<use href="#obstacle" x="4765" y="-5635" />
+<use href="#obstacle" x="4765" y="-6635" />
+<use href="#obstacle" x="4865" y="-135" />
+<use href="#obstacle" x="4865" y="-1035" />
+<use href="#obstacle" x="4865" y="-2435" />
+<use href="#obstacle" x="4865" y="-3635" />
+<use href="#obstacle" x="4865" y="-3835" />
+<use href="#obstacle" x="4865" y="-4835" />
+<use href="#obstacle" x="4865" y="-5035" />
+<use href="#obstacle" x="4865" y="-5935" />
+<use href="#obstacle" x="4865" y="-6635" />
+<use href="#obstacle" x="4965" y="-135" />
+<use href="#obstacle" x="4965" y="-435" />
+<use href="#obstacle" x="4965" y="-5635" />
+<use href="#obstacle" x="4965" y="-6035" />
+<use href="#obstacle" x="4965" y="-6335" />
+<use href="#obstacle" x="4965" y="-6635" />
+<use href="#obstacle" x="5065" y="-135" />
+<use href="#obstacle" x="5065" y="-1735" />
+<use href="#obstacle" x="5065" y="-2435" />
+<use href="#obstacle" x="5065" y="-6635" />
+<use href="#obstacle" x="5165" y="-135" />
+<use href="#obstacle" x="5165" y="-335" />
+<use href="#obstacle" x="5165" y="-935" />
+<use href="#obstacle" x="5165" y="-2035" />
+<use href="#obstacle" x="5165" y="-4335" />
+<use href="#obstacle" x="5165" y="-4735" />
+<use href="#obstacle" x="5165" y="-6035" />
+<use href="#obstacle" x="5165" y="-6435" />
+<use href="#obstacle" x="5165" y="-6635" />
+<use href="#obstacle" x="5265" y="-135" />
+<use href="#obstacle" x="5265" y="-935" />
+<use href="#obstacle" x="5265" y="-1635" />
+<use href="#obstacle" x="5265" y="-3835" />
+<use href="#obstacle" x="5265" y="-5035" />
+<use href="#obstacle" x="5265" y="-5135" />
+<use href="#obstacle" x="5265" y="-5635" />
+<use href="#obstacle" x="5265" y="-6135" />
+<use href="#obstacle" x="5265" y="-6435" />
+<use href="#obstacle" x="5265" y="-6635" />
+<use href="#obstacle" x="5365" y="-135" />
+<use href="#obstacle" x="5365" y="-635" />
+<use href="#obstacle" x="5365" y="-1235" />
+<use href="#obstacle" x="5365" y="-2235" />
+<use href="#obstacle" x="5365" y="-2835" />
+<use href="#obstacle" x="5365" y="-3635" />
+<use href="#obstacle" x="5365" y="-4435" />
+<use href="#obstacle" x="5365" y="-4735" />
+<use href="#obstacle" x="5365" y="-6635" />
+<use href="#obstacle" x="5465" y="-135" />
+<use href="#obstacle" x="5465" y="-835" />
+<use href="#obstacle" x="5465" y="-1035" />
+<use href="#obstacle" x="5465" y="-1235" />
+<use href="#obstacle" x="5465" y="-2635" />
+<use href="#obstacle" x="5465" y="-4535" />
+<use href="#obstacle" x="5465" y="-5335" />
+<use href="#obstacle" x="5465" y="-6235" />
+<use href="#obstacle" x="5465" y="-6335" />
+<use href="#obstacle" x="5465" y="-6635" />
+<use href="#obstacle" x="5565" y="-135" />
+<use href="#obstacle" x="5565" y="-235" />
+<use href="#obstacle" x="5565" y="-935" />
+<use href="#obstacle" x="5565" y="-2935" />
+<use href="#obstacle" x="5565" y="-4635" />
+<use href="#obstacle" x="5565" y="-5235" />
+<use href="#obstacle" x="5565" y="-6635" />
+<use href="#obstacle" x="5665" y="-135" />
+<use href="#obstacle" x="5665" y="-1035" />
+<use href="#obstacle" x="5665" y="-1635" />
+<use href="#obstacle" x="5665" y="-2035" />
+<use href="#obstacle" x="5665" y="-3035" />
+<use href="#obstacle" x="5665" y="-3435" />
+<use href="#obstacle" x="5665" y="-3635" />
+<use href="#obstacle" x="5665" y="-4435" />
+<use href="#obstacle" x="5665" y="-4635" />
+<use href="#obstacle" x="5665" y="-4735" />
+<use href="#obstacle" x="5665" y="-5935" />
+<use href="#obstacle" x="5665" y="-6635" />
+<use href="#obstacle" x="5765" y="-135" />
+<use href="#obstacle" x="5765" y="-3635" />
+<use href="#obstacle" x="5765" y="-4135" />
+<use href="#obstacle" x="5765" y="-4935" />
+<use href="#obstacle" x="5765" y="-6335" />
+<use href="#obstacle" x="5765" y="-6535" />
+<use href="#obstacle" x="5765" y="-6635" />
+<use href="#obstacle" x="5865" y="-135" />
+<use href="#obstacle" x="5865" y="-1135" />
+<use href="#obstacle" x="5865" y="-1535" />
+<use href="#obstacle" x="5865" y="-2035" />
+<use href="#obstacle" x="5865" y="-2435" />
+<use href="#obstacle" x="5865" y="-2535" />
+<use href="#obstacle" x="5865" y="-3335" />
+<use href="#obstacle" x="5865" y="-4735" />
+<use href="#obstacle" x="5865" y="-6635" />
+<use href="#obstacle" x="5965" y="-135" />
+<use href="#obstacle" x="5965" y="-3435" />
+<use href="#obstacle" x="5965" y="-4435" />
+<use href="#obstacle" x="5965" y="-6335" />
+<use href="#obstacle" x="5965" y="-6635" />
+<use href="#obstacle" x="6065" y="-135" />
+<use href="#obstacle" x="6065" y="-1435" />
+<use href="#obstacle" x="6065" y="-3235" />
+<use href="#obstacle" x="6065" y="-3335" />
+<use href="#obstacle" x="6065" y="-3435" />
+<use href="#obstacle" x="6065" y="-3635" />
+<use href="#obstacle" x="6065" y="-4135" />
+<use href="#obstacle" x="6065" y="-4235" />
+<use href="#obstacle" x="6065" y="-4335" />
+<use href="#obstacle" x="6065" y="-4435" />
+<use href="#obstacle" x="6065" y="-5435" />
+<use href="#obstacle" x="6065" y="-5535" />
+<use href="#obstacle" x="6065" y="-5935" />
+<use href="#obstacle" x="6065" y="-6635" />
+<use href="#obstacle" x="6165" y="-135" />
+<use href="#obstacle" x="6165" y="-1635" />
+<use href="#obstacle" x="6165" y="-2735" />
+<use href="#obstacle" x="6165" y="-3535" />
+<use href="#obstacle" x="6165" y="-3835" />
+<use href="#obstacle" x="6165" y="-4535" />
+<use href="#obstacle" x="6165" y="-6635" />
+<use href="#obstacle" x="6265" y="-135" />
+<use href="#obstacle" x="6265" y="-1135" />
+<use href="#obstacle" x="6265" y="-1235" />
+<use href="#obstacle" x="6265" y="-1335" />
+<use href="#obstacle" x="6265" y="-1635" />
+<use href="#obstacle" x="6265" y="-2535" />
+<use href="#obstacle" x="6265" y="-4035" />
+<use href="#obstacle" x="6265" y="-5935" />
+<use href="#obstacle" x="6265" y="-6135" />
+<use href="#obstacle" x="6265" y="-6635" />
+<use href="#obstacle" x="6365" y="-135" />
+<use href="#obstacle" x="6365" y="-1035" />
+<use href="#obstacle" x="6365" y="-2235" />
+<use href="#obstacle" x="6365" y="-2435" />
+<use href="#obstacle" x="6365" y="-3735" />
+<use href="#obstacle" x="6365" y="-4135" />
+<use href="#obstacle" x="6365" y="-6635" />
+<use href="#obstacle" x="6465" y="-135" />
+<use href="#obstacle" x="6465" y="-335" />
+<use href="#obstacle" x="6465" y="-1135" />
+<use href="#obstacle" x="6465" y="-5635" />
+<use href="#obstacle" x="6465" y="-6635" />
+<use href="#obstacle" x="6565" y="-135" />
+<use href="#obstacle" x="6565" y="-235" />
+<use href="#obstacle" x="6565" y="-335" />
+<use href="#obstacle" x="6565" y="-435" />
+<use href="#obstacle" x="6565" y="-535" />
+<use href="#obstacle" x="6565" y="-635" />
+<use href="#obstacle" x="6565" y="-735" />
+<use href="#obstacle" x="6565" y="-835" />
+<use href="#obstacle" x="6565" y="-935" />
+<use href="#obstacle" x="6565" y="-1035" />
+<use href="#obstacle" x="6565" y="-1135" />
+<use href="#obstacle" x="6565" y="-1235" />
+<use href="#obstacle" x="6565" y="-1335" />
+<use href="#obstacle" x="6565" y="-1435" />
+<use href="#obstacle" x="6565" y="-1535" />
+<use href="#obstacle" x="6565" y="-1635" />
+<use href="#obstacle" x="6565" y="-1735" />
+<use href="#obstacle" x="6565" y="-1835" />
+<use href="#obstacle" x="6565" y="-1935" />
+<use href="#obstacle" x="6565" y="-2035" />
+<use href="#obstacle" x="6565" y="-2135" />
+<use href="#obstacle" x="6565" y="-2235" />
+<use href="#obstacle" x="6565" y="-2335" />
+<use href="#obstacle" x="6565" y="-2435" />
+<use href="#obstacle" x="6565" y="-2535" />
+<use href="#obstacle" x="6565" y="-2635" />
+<use href="#obstacle" x="6565" y="-2735" />
+<use href="#obstacle" x="6565" y="-2835" />
+<use href="#obstacle" x="6565" y="-2935" />
+<use href="#obstacle" x="6565" y="-3035" />
+<use href="#obstacle" x="6565" y="-3135" />
+<use href="#obstacle" x="6565" y="-3235" />
+<use href="#obstacle" x="6565" y="-3335" />
+<use href="#obstacle" x="6565" y="-3435" />
+<use href="#obstacle" x="6565" y="-3535" />
+<use href="#obstacle" x="6565" y="-3635" />
+<use href="#obstacle" x="6565" y="-3735" />
+<use href="#obstacle" x="6565" y="-3835" />
+<use href="#obstacle" x="6565" y="-3935" />
+<use href="#obstacle" x="6565" y="-4035" />
+<use href="#obstacle" x="6565" y="-4135" />
+<use href="#obstacle" x="6565" y="-4235" />
+<use href="#obstacle" x="6565" y="-4335" />
+<use href="#obstacle" x="6565" y="-4435" />
+<use href="#obstacle" x="6565" y="-4535" />
+<use href="#obstacle" x="6565" y="-4635" />
+<use href="#obstacle" x="6565" y="-4735" />
+<use href="#obstacle" x="6565" y="-4835" />
+<use href="#obstacle" x="6565" y="-4935" />
+<use href="#obstacle" x="6565" y="-5035" />
+<use href="#obstacle" x="6565" y="-5135" />
+<use href="#obstacle" x="6565" y="-5235" />
+<use href="#obstacle" x="6565" y="-5335" />
+<use href="#obstacle" x="6565" y="-5435" />
+<use href="#obstacle" x="6565" y="-5535" />
+<use href="#obstacle" x="6565" y="-5635" />
+<use href="#obstacle" x="6565" y="-5735" />
+<use href="#obstacle" x="6565" y="-5835" />
+<use href="#obstacle" x="6565" y="-5935" />
+<use href="#obstacle" x="6565" y="-6035" />
+<use href="#obstacle" x="6565" y="-6135" />
+<use href="#obstacle" x="6565" y="-6235" />
+<use href="#obstacle" x="6565" y="-6335" />
+<use href="#obstacle" x="6565" y="-6435" />
+<use href="#obstacle" x="6565" y="-6535" />
+<use href="#obstacle" x="6565" y="-6635" />
+<circle class="agent" cx="5000" cy="-3400" fill="#c1433c" r="35"> <animate attributeName="cy" dur="14.25s" keyTimes="0.0;0.0172413793;0.0344827586;0.0517241379;0.0689655172;0.0862068966;0.1034482759;0.1206896552;0.3793103448;0.3965517241;0.5172413793;0.5344827586;0.8793103448;0.8965517241;0.9655172414;0.9827586207;1.0" repeatCount="indefinite" values="-3400;-3400;-3300;-3200;-3100;-3000;-2900;-2800;-2800;-2900;-2900;-2800;-2800;-2900;-2900;-2800;-2800"/>
+<animate attributeName="cx" dur="14.25s" keyTimes="0.0;0.0172413793;0.1206896552;0.1379310345;0.1551724138;0.1724137931;0.1896551724;0.2068965517;0.224137931;0.2413793103;0.2586206897;0.275862069;0.2931034483;0.3103448276;0.3275862069;0.3448275862;0.3965517241;0.4137931034;0.4310344828;0.4482758621;0.4655172414;0.4827586207;0.5;0.5172413793;0.5344827586;0.5517241379;0.5689655172;0.5862068966;0.6034482759;0.6206896552;0.6379310345;0.6551724138;0.6724137931;0.6896551724;0.7068965517;0.724137931;0.7413793103;0.7586206897;0.775862069;0.7931034483;0.8103448276;0.8275862069;0.8448275862;0.8965517241;0.9137931034;0.9310344828;0.9482758621;0.9655172414;1.0" repeatCount="indefinite" values="5000;5000;5000;4900;4800;4700;4600;4500;4400;4300;4200;4100;4000;3900;3800;3700;3700;3600;3500;3400;3300;3200;3100;3000;3000;2900;2800;2700;2600;2500;2400;2300;2200;2100;2000;1900;1800;1700;1600;1500;1400;1300;1200;1200;1100;1000;900;800;800"/>
+<animate attributeName="visibility" dur="14.25s" keyTimes="0.0;0.0172413793;1.0" repeatCount="indefinite" values="visible;visible;visible"/> </circle>
+<circle class="agent" cx="4800" cy="-600" fill="#2e6f9e" r="35"> <animate attributeName="cy" dur="14.25s" keyTimes="0.0;0.0172413793;0.1034482759;0.1206896552;1.0" repeatCount="indefinite" values="-600;-600;-600;-500;-500"/>
+<animate attributeName="cx" dur="14.25s" keyTimes="0.0;0.0172413793;0.0344827586;0.0517241379;0.0689655172;0.0862068966;0.1034482759;0.1206896552;0.1379310345;0.1551724138;0.1724137931;0.1896551724;1.0" repeatCount="indefinite" values="4800;4800;4900;5000;5100;5200;5300;5300;5400;5500;5600;5700;5700"/>
+<animate attributeName="visibility" dur="14.25s" keyTimes="0.0;0.0172413793;1.0" repeatCount="indefinite" values="visible;visible;visible"/> </circle>
+<circle class="agent" cx="5300" cy="-3700" fill="#6e81af" r="35"> <animate attributeName="cy" dur="14.25s" keyTimes="0.0;0.0172413793;0.0344827586;0.0517241379;0.0689655172;0.0862068966;1.0" repeatCount="indefinite" values="-3700;-3700;-3700;-3800;-3900;-4000;-4000"/>
+<animate attributeName="cx" dur="14.25s" keyTimes="0.0;0.0172413793;0.0344827586;0.0862068966;0.1034482759;0.1206896552;0.1379310345;0.1551724138;1.0" repeatCount="indefinite" values="5300;5300;5400;5400;5500;5600;5700;5800;5800"/>
+<animate attributeName="visibility" dur="14.25s" keyTimes="0.0;0.0172413793;1.0" repeatCount="indefinite" values="visible;visible;visible"/> </circle>
+<circle class="agent" cx="400" cy="-2200" fill="#00b9c8" r="35"> <animate attributeName="cy" dur="14.25s" keyTimes="0.0;0.0172413793;0.0344827586;0.0517241379;0.0689655172;0.0862068966;0.1034482759;0.1206896552;0.1379310345;0.1551724138;0.1724137931;0.1896551724;0.2068965517;0.224137931;0.2413793103;0.2586206897;0.275862069;0.2931034483;0.3103448276;0.3275862069;0.3448275862;0.3620689655;0.3793103448;0.3965517241;0.4137931034;0.4310344828;0.4482758621;0.4655172414;0.4827586207;0.5;0.5172413793;0.5344827586;0.5517241379;0.5862068966;0.6034482759;0.6206896552;0.6379310345;0.6551724138;0.6724137931;0.6896551724;0.7068965517;0.724137931;0.7413793103;0.7586206897;0.775862069;0.7931034483;0.8103448276;1.0" repeatCount="indefinite" values="-2200;-2200;-2300;-2400;-2500;-2600;-2700;-2800;-2800;-2900;-3000;-3100;-3200;-3300;-3400;-3500;-3600;-3700;-3800;-3900;-3900;-4000;-4000;-4100;-4200;-4300;-4400;-4500;-4600;-4700;-4800;-4900;-5000;-5000;-5100;-5200;-5300;-5400;-5500;-5600;-5700;-5800;-5900;-6000;-6100;-6200;-6300;-6300"/>
+<animate attributeName="cx" dur="14.25s" keyTimes="0.0;0.0172413793;0.1206896552;0.1379310345;0.3275862069;0.3448275862;0.3620689655;0.3793103448;0.5517241379;0.5689655172;0.5862068966;0.8103448276;0.8275862069;0.8448275862;0.8620689655;0.8793103448;0.8965517241;1.0" repeatCount="indefinite" values="400;400;400;500;500;600;600;700;700;800;900;900;1000;1100;1200;1300;1400;1400"/>
+<animate attributeName="visibility" dur="14.25s" keyTimes="0.0;0.0172413793;1.0" repeatCount="indefinite" values="visible;visible;visible"/> </circle>
+<circle class="target" cx="800" cy="-2800" r="35" stroke="#c1433c"> <animate attributeName="visibility" dur="14.25s" keyTimes="0.0;0.0172413793;1.0" repeatCount="indefinite" values="visible;visible;visible"/> </circle>
+<circle class="target" cx="5700" cy="-500" r="35" stroke="#2e6f9e"> <animate attributeName="visibility" dur="14.25s" keyTimes="0.0;0.0172413793;1.0" repeatCount="indefinite" values="visible;visible;visible"/> </circle>
+<circle class="target" cx="5800" cy="-4000" r="35" stroke="#6e81af"> <animate attributeName="visibility" dur="14.25s" keyTimes="0.0;0.0172413793;1.0" repeatCount="indefinite" values="visible;visible;visible"/> </circle>
+<circle class="target" cx="1400" cy="-6300" r="35" stroke="#00b9c8"> <animate attributeName="visibility" dur="14.25s" keyTimes="0.0;0.0172413793;1.0" repeatCount="indefinite" values="visible;visible;visible"/> </circle>
+</svg>

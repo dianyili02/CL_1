@@ -1,0 +1,14 @@
+{
+  "episodes": 300,
+  "success_rate": 0.54,
+  "avg_steps": 137.85,
+  "collision_per_step": 0.0,
+  "device": "cpu",
+  "seed": 42,
+  "per_episode_seed": true,
+  "assist_astar": true,
+  "max_steps_mult": 4,
+  "easy_first": true,
+  "created_at": "2025-09-02T18:32:06",
+  "weights_path": ".\\models\\best_model.pt"
+}
